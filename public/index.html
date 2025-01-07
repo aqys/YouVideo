@@ -11,7 +11,6 @@
     <h1>YouVideo</h1>
     
     <button id="loginButton">Login</button>
-    <button id="logoutButton" style="display: none;">Logout</button>
 
     <!-- Login Form -->
     <section class="signin" id="loginForm">
@@ -56,11 +55,14 @@
         </div>
     </section>
 
-    <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data" style="display: none;">
-        <input type="text" name="videoName" id="videoName" required style="display: none;"/>
-        <input type="file" name="videoFile" id="videoFile" accept="video/*" required style="display: none;"/>
-        <input type="hidden" name="author" id="author" />
-    </form>
+    <div class="loggedInButtons">
+        <button id="logoutButton" style="display: none;">Logout</button>
+        <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data" style="display: none;">
+            <input type="text" name="videoName" id="videoName" required style="display: none;"/>
+            <input type="file" name="videoFile" id="videoFile" accept="video/*" required style="display: none;"/>
+            <input type="hidden" name="author" id="author" />
+        </form>
+    </div>
     
     <button id="uploadButton">Upload Video</button>
 

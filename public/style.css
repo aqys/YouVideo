@@ -167,7 +167,15 @@ form {
     width: 100%;
     aspect-ratio: 16/9;
     border-radius: 12px;
-    border: 1px solid #e6e6e638;
+    border: 1px solid #e6e6e64d;
+    transition: filter 0.2s, border 0.2s, transform 0.2s;
+}
+
+.video-thumbnail:hover {
+    border: 1px solid #e6e6e679;
+    cursor: pointer;
+    filter: brightness(0.6);
+    transform: scale(1.01);
 }
 
 .error {
@@ -202,6 +210,10 @@ form {
     box-shadow: 0 0 25px 1px #ff0033ce;
 }
 
+#registerButton {
+    margin-top: -25px;
+}
+
 #loginButton {
     align-self: center;
 }
@@ -214,4 +226,8 @@ form {
 .inputBox {
     margin: 0;
     padding: 0;
+}
+
+.loggedInButtons {
+    justify-content: space-evenly;
 }
