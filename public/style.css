@@ -17,13 +17,14 @@ form {
     left: 50%;
     transform: translate(-50%, -50%);
     width: 400px;
-    background: #222;  
+    background: #131313;  
     z-index: 1000;
     justify-content: center;
     align-items: center;
     padding: 40px;
-    border-radius: 4px;
+    border-radius: 12px;
     box-shadow: 0 15px 35px rgba(0,0,0,0.9);
+    border: 1px solid #333;
 }
 
 #loginForm .content, #registerForm .content {
@@ -52,25 +53,27 @@ form {
 #loginForm .content .form .inputBox, #registerForm .content .form .inputBox {
     position: relative;
     width: 100%;
+    margin: 0;
 }
 
 #loginForm .content .form .inputBox input, #registerForm .content .form .inputBox input {
     position: relative;
     width: 100%;
-    background: #333;
+    background: #272727;
     border: none;
     outline: none;
-    padding: 25px 10px 7.5px;
+    padding-top: 1vh;
+    padding-bottom: 1vh;
     border-radius: 4px;
     color: #fff;
     font-weight: 500;
     font-size: 1em;
+    margin-bottom: 1vh;
 }
 
 #loginForm .content .form .inputBox i, #registerForm .content .form .inputBox i {
     position: absolute;
-    top: -20px;
-    left: 10px;
+    top: -25px;
     font-style: normal;
     color: #aaa;
     transition: 0.5s;
@@ -104,8 +107,8 @@ form {
 
 .close {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: -15px;
+    right: -15px;
     font-size: 1.5em;
     cursor: pointer;
     color: #fff;
@@ -181,16 +184,34 @@ form {
     border-radius: 12px;
 }
 
-#loginButton, #registerButton {
+#loginButton, #registerButton, #logoutButton, #uploadButton {
     margin: 10px;
-    padding: 10px 20px;
-    background-color: #007BFF;
+    padding: 10px 0px;
+    background-color: #FF0033;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 12px;
     cursor: pointer;
+    width: 90px;
+    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
 }
 
-#loginButton:hover, #registerButton:hover {
-    background-color: #0056b3;
+#loginButton:hover, #registerButton:hover, #logoutButton:hover, #uploadButton:hover {
+    background-color: #ffffff;
+    color: #000;
+    box-shadow: 0 0 25px 1px #ff0033ce;
+}
+
+#loginButton {
+    align-self: center;
+}
+
+#uploadButton {
+    font-size: 0.75em;
+    line-height: 1.25em;
+}
+
+.inputBox {
+    margin: 0;
+    padding: 0;
 }

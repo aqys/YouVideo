@@ -11,6 +11,7 @@
     <h1>YouVideo</h1>
     
     <button id="loginButton">Login</button>
+    <button id="logoutButton" style="display: none;">Logout</button>
 
     <!-- Login Form -->
     <section class="signin" id="loginForm">
@@ -20,13 +21,13 @@
             <form class="form" action="/login" method="POST">
                 <div class="inputBox">
                     <i>Username</i>
-                    <input type="text" name="userName" id="userName" placeholder="Username" required autocomplete="username"/>
+                    <input type="text" name="userName" id="userName" placeholder="Username" autocomplete="off" required autocomplete="username"/>
                 </div>
                 <div class="inputBox">
                     <i>Password</i>
-                    <input type="password" name="userPassword" id="userPassword" placeholder="Password" required autocomplete="current-password"/>
+                    <input type="password" name="userPassword" id="userPassword" placeholder="Password" autocomplete="off" required autocomplete="current-password"/>
                 </div>
-                <input type="submit" value="Login">
+                <input id="loginButton" type="submit" value="Login">
             </form>
             <button id="registerButton">Register</button>
         </div>
@@ -40,22 +41,20 @@
             <form class="form" action="/register" method="POST">
                 <div class="inputBox">
                     <i>Username</i>
-                    <input type="text" name="userName" id="registerUserName" placeholder="Username" required autocomplete="username"/>
+                    <input type="text" name="userName" id="registerUserName" placeholder="Username" autocomplete="off" required autocomplete="username"/>
                 </div>
                 <div class="inputBox">
                     <i>Password</i>
-                    <input type="password" name="userPassword" id="registerUserPassword" placeholder="Password" required autocomplete="new-password"/>
+                    <input type="password" name="userPassword" id="registerUserPassword" placeholder="Password" autocomplete="off" required autocomplete="new-password"/>
                 </div>
                 <div class="inputBox">
                     <i>Confirm Password</i>
-                    <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" required autocomplete="new-password"/>
+                    <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" autocomplete="off" required autocomplete="new-password"/>
                 </div>
                 <input type="submit" value="Register">
             </form>
         </div>
     </section>
-
-    <button id="logoutButton" style="display: none;">Logout</button>
 
     <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data" style="display: none;">
         <input type="text" name="videoName" id="videoName" required style="display: none;"/>
@@ -70,18 +69,21 @@
 
     <script>
         document.getElementById('loginButton').addEventListener('click', function() {
-            if (document.getElementById('loginButton').innerText === 'Logout') {
-                fetch('/logout', { method: 'POST' })
-                    .then(response => {
-                        if (response.ok) {
-                            checkLoginStatus();
-                        } else {
-                            console.error('Error logging out');
-                        }
-                    })
-                    .catch(error => console.error('Error logging out:', error));
-            } else {
-                document.getElementById('loginForm').style.display = 'flex';
+            document.getElementById('loginForm').style.display = 'flex';
+        });
+
+        document.getElementById('logoutButton').addEventListener('click', async function() {
+            try {
+                const response = await fetch('/logout', {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    checkLoginStatus();
+                } else {
+                    console.error('Error logging out');
+                }
+            } catch (error) {
+                console.error('Error logging out:', error);
             }
         });
 
@@ -158,13 +160,13 @@
                 const response = await fetch('/check-login');
                 const data = await response.json();
                 if (data.loggedIn) {
-                    document.getElementById('loginButton').innerText = 'Logout';
+                    document.getElementById('loginButton').style.display = 'none';
                     document.getElementById('logoutButton').style.display = 'block';
                     document.getElementById('uploadForm').style.display = 'block';
                     document.getElementById('uploadButton').style.display = 'block';
                     document.getElementById('author').value = data.user.userName;
                 } else {
-                    document.getElementById('loginButton').innerText = 'Login';
+                    document.getElementById('loginButton').style.display = 'block';
                     document.getElementById('logoutButton').style.display = 'none';
                     document.getElementById('uploadForm').style.display = 'none';
                     document.getElementById('uploadButton').style.display = 'none';
@@ -174,49 +176,61 @@
             }
         }
 
-        // Logout function
-        document.getElementById('logoutButton').addEventListener('click', async function() {
-            try {
-                const response = await fetch('/logout', {
-                    method: 'POST'
-                });
-                if (response.ok) {
-                    checkLoginStatus();
-                } else {
-                    console.error('Error logging out');
-                }
-            } catch (error) {
-                console.error('Error logging out:', error);
-            }
-        });
-
         // Handle login form submission
         document.getElementById('loginForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const userName = document.getElementById('userName').value;
-            const userPassword = document.getElementById('userPassword').value;
+        event.preventDefault();
+        const userName = document.getElementById('userName').value;
+        const userPassword = document.getElementById('userPassword').value;
 
-            try {
-                const response = await fetch('/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ userName, userPassword })
-                });
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userName, userPassword })
+            });
 
-                if (response.ok) {
-                    const user = await response.json();
-                    console.log('User data:', user); // Debugging log
-                    checkLoginStatus();
-                } else {
-                    const error = await response.json();
-                    alert(error.error);
-                }
-            } catch (error) {
-                console.error('Error during login:', error);
+            if (response.ok) {
+                const user = await response.json();
+                console.log('User data:', user); // Debugging log
+                document.getElementById('loginForm').style.display = 'none'; // Hide login form
+                checkLoginStatus();
+            } else {
+                const error = await response.json();
+                alert(error.error);
             }
-        });
+        } catch (error) {
+            console.error('Error during login:', error);
+        }
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const userName = document.getElementById('registerUserName').value;
+        const userPassword = document.getElementById('registerUserPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        try {
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userName, userPassword, confirmPassword })
+            });
+
+            if (response.ok) {
+                document.getElementById('registerForm').style.display = 'none'; // Hide register form
+                checkLoginStatus();
+            } else {
+                const error = await response.json();
+                alert(error.error);
+            }
+        } catch (error) {
+            console.error('Error during registration:', error);
+        }
+    });
     </script>
 </body>
 </html>
