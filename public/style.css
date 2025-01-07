@@ -1,0 +1,196 @@
+body {
+    background-color: black;
+    font-family: 'Roboto';
+    margin: 0;
+    padding: 0;
+    color: #fff;
+}
+
+form {
+    display: flex;
+}
+
+#loginForm, #registerForm {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    background: #222;  
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    border-radius: 4px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.9);
+}
+
+#loginForm .content, #registerForm .content {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 40px;
+}
+
+#loginForm .content h2, #registerForm .content h2 {
+    font-size: 2em;
+    color: rgb(255, 255, 255);
+    text-transform: uppercase;
+}
+
+#loginForm .content .form, #registerForm .content .form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+#loginForm .content .form .inputBox, #registerForm .content .form .inputBox {
+    position: relative;
+    width: 100%;
+}
+
+#loginForm .content .form .inputBox input, #registerForm .content .form .inputBox input {
+    position: relative;
+    width: 100%;
+    background: #333;
+    border: none;
+    outline: none;
+    padding: 25px 10px 7.5px;
+    border-radius: 4px;
+    color: #fff;
+    font-weight: 500;
+    font-size: 1em;
+}
+
+#loginForm .content .form .inputBox i, #registerForm .content .form .inputBox i {
+    position: absolute;
+    top: -20px;
+    left: 10px;
+    font-style: normal;
+    color: #aaa;
+    transition: 0.5s;
+    pointer-events: none;
+}
+
+#loginForm .content .form .inputBox input:focus ~ i,
+#loginForm .content .form .inputBox input:valid ~ i,
+#registerForm .content .form .inputBox input:focus ~ i,
+#registerForm .content .form .inputBox input:valid ~ i {
+    transform: translateY(-7.5px);
+    font-size: 0.8em;
+    color: #fff;
+}
+
+#loginForm .content .form .inputBox input[type="submit"],
+#registerForm .content .form .inputBox input[type="submit"] {
+    padding: 10px;
+    background: rgb(255, 255, 255);
+    color: #000;
+    font-weight: 600;
+    font-size: 1.35em;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+}
+
+#loginForm input[type="submit"]:active,
+#registerForm input[type="submit"]:active {
+    opacity: 0.6;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #fff;
+}
+
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1vw;
+    padding: 1vw;
+}
+
+.video-item {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid #3131313b;
+}
+
+.video-info {
+    text-align: left;
+    margin-top: -1.75vh;
+    padding-left: 0.2vw;
+    color: #F1F1F1;
+    font-weight: 500;
+    font-size: 1.1rem;
+    line-height: 2.2rem;
+    max-height: 4.4rem;
+}
+
+.video-author {
+    color: #AAAAAA;
+    font-size: 0.9rem;
+    font-weight: 400;
+    margin-top: -2.5vh;
+}
+
+.video-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.no-thumbnail {
+    width: 100%;
+    height: 180px;
+    background-color: #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    border-radius: 8px;
+}
+
+.video-thumbnail {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 12px;
+    border: 1px solid #e6e6e638;
+}
+
+.error {
+    color: red;
+    padding: 20px;
+    text-align: center;
+}
+
+#videoPlayer {
+    width: 1280px;
+    height: 720px;
+    left: 0px;
+    top: 0px;
+    border-radius: 12px;
+}
+
+#loginButton, #registerButton {
+    margin: 10px;
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#loginButton:hover, #registerButton:hover {
+    background-color: #0056b3;
+}

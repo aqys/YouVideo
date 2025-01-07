@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <title>YouVideo</title>
+</head>
+<body>
+    <h1>YouVideo</h1>
+    
+    <button id="loginButton">Login</button>
+
+    <!-- Login Form -->
+    <section class="signin" id="loginForm">
+        <div class="content">
+            <span class="close" id="closeLoginForm">&times;</span>
+            <h2>Login</h2>
+            <form class="form" action="/login" method="POST">
+                <div class="inputBox">
+                    <i>Username</i>
+                    <input type="text" name="userName" id="userName" placeholder="Username" required autocomplete="username"/>
+                </div>
+                <div class="inputBox">
+                    <i>Password</i>
+                    <input type="password" name="userPassword" id="userPassword" placeholder="Password" required autocomplete="current-password"/>
+                </div>
+                <input type="submit" value="Login">
+            </form>
+            <button id="registerButton">Register</button>
+        </div>
+    </section>
+
+    <!-- Registration Form -->
+    <section class="signin" id="registerForm">
+        <div class="content">
+            <span class="close" id="closeRegisterForm">&times;</span>
+            <h2>Register</h2>
+            <form class="form" action="/register" method="POST">
+                <div class="inputBox">
+                    <i>Username</i>
+                    <input type="text" name="userName" id="registerUserName" placeholder="Username" required autocomplete="username"/>
+                </div>
+                <div class="inputBox">
+                    <i>Password</i>
+                    <input type="password" name="userPassword" id="registerUserPassword" placeholder="Password" required autocomplete="new-password"/>
+                </div>
+                <div class="inputBox">
+                    <i>Confirm Password</i>
+                    <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" required autocomplete="new-password"/>
+                </div>
+                <input type="submit" value="Register">
+            </form>
+        </div>
+    </section>
+
+    <button id="logoutButton" style="display: none;">Logout</button>
+
+    <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data" style="display: none;">
+        <input type="text" name="videoName" id="videoName" required style="display: none;"/>
+        <input type="file" name="videoFile" id="videoFile" accept="video/*" required style="display: none;"/>
+        <input type="hidden" name="author" id="author" />
+    </form>
+    
+    <button id="uploadButton">Upload Video</button>
+
+    <h2>Videos</h2>
+    <div id="videoGrid" class="video-grid"></div>
+
+    <script>
+        document.getElementById('loginButton').addEventListener('click', function() {
+            if (document.getElementById('loginButton').innerText === 'Logout') {
+                fetch('/logout', { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            checkLoginStatus();
+                        } else {
+                            console.error('Error logging out');
+                        }
+                    })
+                    .catch(error => console.error('Error logging out:', error));
+            } else {
+                document.getElementById('loginForm').style.display = 'flex';
+            }
+        });
+
+        document.getElementById('registerButton').addEventListener('click', function() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'flex';
+        });
+
+        document.getElementById('closeLoginForm').addEventListener('click', function() {
+            document.getElementById('loginForm').style.display = 'none';
+        });
+
+        document.getElementById('closeRegisterForm').addEventListener('click', function() {
+            document.getElementById('registerForm').style.display = 'none';
+        });
+
+        document.getElementById('uploadButton').addEventListener('click', function() {
+            document.getElementById('videoFile').click();
+        });
+
+        document.getElementById('videoFile').addEventListener('change', function() {
+            const videoName = prompt('Enter video name:');
+            if (videoName) {
+                document.getElementById('videoName').value = videoName;
+                document.getElementById('uploadForm').submit();
+            }
+        });
+
+        async function populateVideoGrid() {
+            try {
+                const response = await fetch('/videos');
+                const videos = await response.json();
+                const videoGrid = document.getElementById('videoGrid');
+                videoGrid.innerHTML = '';
+                
+                videos.forEach(video => {
+                    const videoElement = document.createElement('div');
+                    videoElement.classList.add('video-item');
+                    
+                    videoElement.innerHTML = `
+                        <img 
+                            src="/thumbnail/${video.id}"
+                            alt="${video.video_name}"
+                            class="video-thumbnail"
+                            onerror="this.parentElement.innerHTML = '<div class=\'no-thumbnail\'><span>No Thumbnail</span></div>'"
+                        />
+                        <div class="video-info">
+                            <p>${video.video_name}</p>
+                            <p class="video-author">${video.author || 'Unknown'}</p>
+                        </div>
+                    `;
+                    
+                    videoElement.addEventListener('click', () => {
+                        window.location.href = `/video.html?id=${video.id}`;
+                    });
+                    
+                    videoGrid.appendChild(videoElement);
+                });
+            } catch (error) {
+                console.error('Error loading videos:', error);
+                document.getElementById('videoGrid').innerHTML = 
+                    '<div class="error">Error loading videos</div>';
+            }
+        }
+
+        window.onload = function() {
+            populateVideoGrid();
+            checkLoginStatus();
+        };
+
+        // Check login status and update UI
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('/check-login');
+                const data = await response.json();
+                if (data.loggedIn) {
+                    document.getElementById('loginButton').innerText = 'Logout';
+                    document.getElementById('logoutButton').style.display = 'block';
+                    document.getElementById('uploadForm').style.display = 'block';
+                    document.getElementById('uploadButton').style.display = 'block';
+                    document.getElementById('author').value = data.user.userName;
+                } else {
+                    document.getElementById('loginButton').innerText = 'Login';
+                    document.getElementById('logoutButton').style.display = 'none';
+                    document.getElementById('uploadForm').style.display = 'none';
+                    document.getElementById('uploadButton').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error checking login status:', error);
+            }
+        }
+
+        // Logout function
+        document.getElementById('logoutButton').addEventListener('click', async function() {
+            try {
+                const response = await fetch('/logout', {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    checkLoginStatus();
+                } else {
+                    console.error('Error logging out');
+                }
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        });
+
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const userName = document.getElementById('userName').value;
+            const userPassword = document.getElementById('userPassword').value;
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ userName, userPassword })
+                });
+
+                if (response.ok) {
+                    const user = await response.json();
+                    console.log('User data:', user); // Debugging log
+                    checkLoginStatus();
+                } else {
+                    const error = await response.json();
+                    alert(error.error);
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+            }
+        });
+    </script>
+</body>
+</html>
