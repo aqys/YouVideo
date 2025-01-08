@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <title>Profile - YouVideo</title>
+</head>
+<body>
+    <a class="logo" href="/"><h1>YouVideo</h1></a>
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="profile-picture-container">
+                <img id="profilePicture" src="/default-profile.png" alt="Profile Picture">
+            </div>
+            <div class="profile-info">
+                <h2 id="userName"></h2>
+                <button id="editNameBtn" style="display: none;">Edit Name</button>
+                <div id="editControls" style="display: none;">
+                    <input type="file" id="profilePictureInput" accept="image/*" style="display: none;">
+                    <button id="changeProfilePicture">Change Profile Picture</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="editNameForm" style="display: none;">
+            <input type="text" id="newUserName" placeholder="New username">
+            <button id="saveNameBtn">Save</button>
+            <button id="cancelNameBtn">Cancel</button>
+        </div>
+
+        <h3>Uploaded Videos</h3>
+        <div id="videoGrid" class="video-grid"></div>
+    </div>
+
+    <script>
+        let isOwnProfile = false;
+
+        async function loadProfile() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const profileUserName = urlParams.get('user');
+            
+            try {
+                // If no specific user is provided in URL, use the logged-in user's profile
+                const response = await fetch('/api/profile/' + (profileUserName || ''));
+                const profileData = await response.json();
+                
+                document.getElementById('userName').textContent = profileData.userName;
+                
+                // Show edit controls if it's the user's own profile
+                isOwnProfile = profileData.isOwnProfile;
+                console.log('Is own profile:', isOwnProfile); // Debug log
+                
+                // Make sure these elements exist and are properly shown/hidden
+                const editControls = document.getElementById('editControls');
+                const editNameBtn = document.getElementById('editNameBtn');
+                
+                if (isOwnProfile) {
+                    if (editControls) editControls.style.display = 'block';
+                    if (editNameBtn) editNameBtn.style.display = 'block';
+                } else {
+                    if (editControls) editControls.style.display = 'none';
+                    if (editNameBtn) editNameBtn.style.display = 'none';
+                }
+
+                // Load profile picture
+                document.getElementById('profilePicture').src = 
+                    `/profile-picture/${profileData.userName}?${new Date().getTime()}`;
+
+                // Load user's videos
+                const videosResponse = await fetch(`/api/user-videos/${profileData.userName}`);
+                const videos = await videosResponse.json();
+                displayVideos(videos);
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        function displayVideos(videos) {
+            const videoGrid = document.getElementById('videoGrid');
+            videoGrid.innerHTML = '';
+            
+            videos.forEach(video => {
+                const videoElement = document.createElement('div');
+                videoElement.classList.add('video-item');
+                
+                videoElement.innerHTML = `
+                    <img 
+                        src="/thumbnail/${video.id}"
+                        alt="${video.video_name}"
+                        class="video-thumbnail"
+                        onerror="this.parentElement.innerHTML = '<div class=\'no-thumbnail\'><span>No Thumbnail</span></div>'"
+                    />
+                    <div class="video-info">
+                        <p>${video.video_name}</p>
+                    </div>
+                `;
+                
+                videoElement.addEventListener('click', () => {
+                    window.location.href = `/video.html?id=${video.id}`;
+                });
+                
+                videoGrid.appendChild(videoElement);
+            });
+        }
+
+        // Profile picture upload handling
+        document.getElementById('changeProfilePicture').addEventListener('click', () => {
+            document.getElementById('profilePictureInput').click();
+        });
+
+        document.getElementById('profilePictureInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('profilePicture', file);
+
+            try {
+                const response = await fetch('/api/update-profile-picture', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    // Reload profile picture with cache-busting query parameter
+                    document.getElementById('profilePicture').src = 
+                        `/profile-picture/${document.getElementById('userName').textContent}?${new Date().getTime()}`;
+                }
+            } catch (error) {
+                console.error('Error updating profile picture:', error);
+            }
+        });
+
+        // Username edit handling
+        document.getElementById('editNameBtn').addEventListener('click', () => {
+            document.getElementById('editNameForm').style.display = 'block';
+            document.getElementById('newUserName').value = document.getElementById('userName').textContent;
+        });
+
+        document.getElementById('saveNameBtn').addEventListener('click', async () => {
+            const newUserName = document.getElementById('newUserName').value;
+            try {
+                const response = await fetch('/api/update-username', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ newUserName })
+                });
+
+                if (response.ok) {
+                    document.getElementById('userName').textContent = newUserName;
+                    document.getElementById('editNameForm').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error updating username:', error);
+            }
+        });
+
+        document.getElementById('cancelNameBtn').addEventListener('click', () => {
+            document.getElementById('editNameForm').style.display = 'none';
+        });
+
+        window.onload = loadProfile;
+    </script>
+</body>
+</html>

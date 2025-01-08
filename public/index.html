@@ -8,9 +8,12 @@
     <title>YouVideo</title>
 </head>
 <body>
-    <h1>YouVideo</h1>
+    <a class="logo" href="/"><h1>YouVideo</h1></a>
     
-    <button id="loginButton">Login</button>
+    <div class="profile-nav" id="profileNav">
+
+    </div>
+    <button id="loginButton" style="display: none;">Login</button>
 
     <!-- Login Form -->
     <section class="signin" id="loginForm">
@@ -50,7 +53,7 @@
                     <i>Confirm Password</i>
                     <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" autocomplete="off" required autocomplete="new-password"/>
                 </div>
-                <input type="submit" value="Register">
+                <input type="submit" value="Register" id="registerButton">
             </form>
         </div>
     </section>
@@ -64,7 +67,7 @@
         </form>
     </div>
     
-    <button id="uploadButton">Upload Video</button>
+    <button id="uploadButton" style="display: none;">Upload Video</button>
 
     <h2>Videos</h2>
     <div id="videoGrid" class="video-grid"></div>
@@ -121,7 +124,10 @@
                 const videoGrid = document.getElementById('videoGrid');
                 videoGrid.innerHTML = '';
                 
-                videos.forEach(video => {
+                // Randomize the videos array
+                const randomizedVideos = videos.sort(() => Math.random() - 0.5);
+                
+                randomizedVideos.forEach(video => {
                     const videoElement = document.createElement('div');
                     videoElement.classList.add('video-item');
                     
@@ -156,19 +162,35 @@
             checkLoginStatus();
         };
 
-        // Check login status and update UI
         async function checkLoginStatus() {
             try {
                 const response = await fetch('/check-login');
                 const data = await response.json();
+                const profileNav = document.getElementById('profileNav');
+                
                 if (data.loggedIn) {
+                    // User is logged in - show profile picture
+                    profileNav.innerHTML = `
+                        <img 
+                            src="/profile-picture/${data.user.userName}?${new Date().getTime()}" 
+                            alt="Profile" 
+                            onerror="this.src='/default-profile.png'"
+                            onclick="window.location.href='/profile.html'"
+                        />
+                    `;
                     document.getElementById('loginButton').style.display = 'none';
                     document.getElementById('logoutButton').style.display = 'block';
                     document.getElementById('uploadForm').style.display = 'block';
                     document.getElementById('uploadButton').style.display = 'block';
                     document.getElementById('author').value = data.user.userName;
                 } else {
-                    document.getElementById('loginButton').style.display = 'block';
+                    // User is not logged in - show sign in button
+                    profileNav.innerHTML = `
+                        <button id="loginButton2" onclick="document.getElementById('loginForm').style.display='flex'">
+                            Sign In
+                        </button>
+                    `;
+                    document.getElementById('loginButton').style.display = 'none';
                     document.getElementById('logoutButton').style.display = 'none';
                     document.getElementById('uploadForm').style.display = 'none';
                     document.getElementById('uploadButton').style.display = 'none';
@@ -180,32 +202,38 @@
 
         // Handle login form submission
         document.getElementById('loginForm').addEventListener('submit', async function(event) {
-        event.preventDefault();
-        const userName = document.getElementById('userName').value;
-        const userPassword = document.getElementById('userPassword').value;
+            event.preventDefault();
+            const userName = document.getElementById('userName').value;
+            const userPassword = document.getElementById('userPassword').value;
 
-        try {
-            const response = await fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ userName, userPassword })
-            });
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ userName, userPassword })
+                });
 
-            if (response.ok) {
-                const user = await response.json();
-                console.log('User data:', user); // Debugging log
-                document.getElementById('loginForm').style.display = 'none'; // Hide login form
-                checkLoginStatus();
-            } else {
-                const error = await response.json();
-                alert(error.error);
+                if (response.ok) {
+                    const user = await response.json();
+                    console.log('User data:', user); // Debug log
+                    
+                    // Verify session was set
+                    const sessionCheck = await fetch('/debug-session');
+                    const sessionData = await sessionCheck.json();
+                    console.log('Session after login:', sessionData); // Debug log
+                    
+                    document.getElementById('loginForm').style.display = 'none';
+                    checkLoginStatus();
+                } else {
+                    const error = await response.json();
+                    alert(error.error);
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
             }
-        } catch (error) {
-            console.error('Error during login:', error);
-        }
-    });
+        });
 
     document.getElementById('registerForm').addEventListener('submit', async function(event) {
         event.preventDefault();

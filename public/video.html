@@ -8,11 +8,13 @@
     <title>YouVideo</title>
 </head>
 <body>
-    <h1>YouVideo</h1>
-    <video id="videoPlayer" controls></video>
+    <a class="logo" href="/"><h1>YouVideo</h1></a>
+    <div id="videoPlaceholder" style="width: 1280px; height: 720px; background-color: gray; display: none;"></div>
+    <video id="videoPlayer" controls style="display: none;"></video>
     <script>
         async function fetchVideoBlob(videoId) {
             try {
+                document.getElementById('videoPlaceholder').style.display = 'block';
                 const response = await fetch(`/video/blob/${videoId}`, {
                     headers: {
                         'Range': 'bytes=0-'
@@ -26,6 +28,8 @@
                 return videoUrl;
             } catch (error) {
                 console.error('Error fetching video blob:', error);
+            } finally {
+                document.getElementById('videoPlaceholder').style.display = 'none';
             }
         }
 
@@ -53,6 +57,7 @@
                 const videoUrl = await fetchVideoBlob(videoId);
                 const videoPlayer = document.getElementById('videoPlayer');
                 videoPlayer.src = videoUrl;
+                videoPlayer.style.display = 'block';
             } else {
                 console.error('Video ID not found in URL');
             }
