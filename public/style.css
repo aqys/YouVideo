@@ -128,6 +128,11 @@ form {
     border: 1px solid #3131313b;
 }
 
+.video-item:hover {
+    cursor:pointer;
+    background-color: #ff00003b;
+}
+
 .video-info {
     text-align: left;
     margin-top: -1.75vh;
@@ -138,6 +143,7 @@ form {
     line-height: 2.2rem;
     max-height: 4.4rem;
 }
+
 
 .video-author {
     color: #AAAAAA;
@@ -169,12 +175,13 @@ form {
     border-radius: 12px;
     border: 1px solid #e6e6e64d;
     transition: filter 0.2s, border 0.2s, transform 0.2s;
+    margin: 0;
 }
 
 .video-thumbnail:hover {
     border: 1px solid #e6e6e679;
     cursor: pointer;
-    filter: brightness(0.6);
+    filter: brightness(0.5);
     transform: scale(1.01);
 }
 
