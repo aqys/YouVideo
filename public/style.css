@@ -26,10 +26,11 @@ form {
 #loginForm, #registerForm {
     display: none;
     position: fixed;
-    top: 50%;
-    left: 50%;
+    top: 30.5%;
+    left: 90.5%;
     transform: translate(-50%, -50%);
-    width: 400px;
+    width: 250px;
+    height: 400px;
     background: #131313;  
     z-index: 1000;
     justify-content: center;
@@ -38,6 +39,15 @@ form {
     border-radius: 12px;
     box-shadow: 0 15px 35px rgba(0,0,0,0.9);
     border: 1px solid #333;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+
+#loginForm.active, #registerForm.active {
+    opacity: 1;
+    visibility: visible;
 }
 
 #loginForm .content, #registerForm .content {
@@ -127,6 +137,19 @@ form {
     color: #fff;
 }
 
+.video-details {
+    margin-top: 20px;
+    color: #fff;
+}
+
+.video-date {
+    color: #818181;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.2;
+}
+
 .video-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -139,7 +162,7 @@ form {
     font-size: 0.9rem;
     font-weight: 400;
     margin-top: -2.5vh;
-  }
+}
 
 .video-item {
     width: 100%;
@@ -162,17 +185,57 @@ form {
     padding-left: 0.2vw;
     color: #F1F1F1;
     font-weight: 500;
-    font-size: 1.1rem;
+    font-size: 1rem;
     line-height: 2.2rem;
     max-height: 4.4rem;
 }
 
+.author-info {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+    padding: 4px;
+}
+
+.author-profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #ffffff33;
+    transition: border-color 0.2s;
+    cursor: pointer;
+}
+
+.author-profile-pic:hover {
+    border-color: #ffffff80;
+}
+
+.text-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.video-info {
+    text-align: left;
+    padding: 0;
+    color: #F1F1F1;
+    margin-top: 0;
+}
 
 .video-author {
-    color: #AAAAAA;
+    color: #818181;
     font-size: 0.9rem;
-    font-weight: 400;
-    margin-top: -2.5vh;
+    font-weight: 500;
+    margin: 0;
+    cursor: pointer;
+    transition: color 0.2s;
+    line-height: 1.2;
+}
+
+.video-author:hover {
+    color: #d6d6d6;
 }
 
 .video-container {
@@ -190,6 +253,15 @@ form {
     justify-content: center;
     color: #666;
     border-radius: 8px;
+}
+
+.video-name {
+    color: #F1F1F1;
+    font-weight: 500;
+    font-size: 1rem;
+    margin: 0;
+    line-height: 1.2;
+    text-overflow: ellipsis;
 }
 
 .video-thumbnail {
@@ -234,15 +306,16 @@ form {
     width: auto;
     display: inline-block;
     margin-right: 100%;
-}
-
-a {
+    height: 10px;
+    margin-bottom: 70px;
+    position: relative;
     text-decoration: none;
     color: white;
+    transition: color 0.15s;
 }
 
-a:hover {
-    color: #ccc;
+.logo:hover {
+    color: #ccccccbd;
 }
 
 #videoPlaceholder {
@@ -272,7 +345,8 @@ a:hover {
 }
 
 #registerButton {
-    margin-top: -25px;
+    margin-top: -18px;
+    align-self: center;
 }
 
 #loginButton {
@@ -354,15 +428,15 @@ a:hover {
 }
 
 .profile-nav {
-    position: fixed;
+    position: absolute;
     top: 20px;
     right: 20px;
     z-index: 100;
 }
 
 .profile-nav img {
-    width: 70px;
-    height: 70px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     cursor: pointer;
     border: 2px solid #ffffff33;
@@ -391,13 +465,22 @@ a:hover {
 
 #loginButton2 {
     background-color: transparent;
-    border: solid 1px rgba(255,255,255,0.3);
+    border: solid 1px rgba(255, 255, 255, 0.35);
     font-weight: 600;
-    color: #fff;
+    color: #ffffff;
     transition: background-color 0.2s, border-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+}
+
+#loginButton2 svg {
+    width: 20px;
+    height: 20px;
 }
 
 #loginButton2:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.125);
     border-color: transparent;
 }

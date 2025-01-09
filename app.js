@@ -15,6 +15,8 @@ dotenv.config();
 // Set the path to the ffmpeg executable
 ffmpeg.setFfmpegPath('C:/ffmpeg/bin/ffmpeg.exe');
 
+app.get('/video/details/:id', videoController.getVideoDetails);
+
 const app = express();
 const port = process.env.PORT || 3000;
 

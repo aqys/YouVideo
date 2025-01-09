@@ -39,6 +39,34 @@ const poolPromise = mssql.connect(dbConfig)
     return null; // Return null if connection fails
   });
 
+  exports.getVideoDetails = async (req, res) => {
+    const videoId = req.params.id;
+    try {
+        const pool = await poolPromise;
+        if (!pool) {
+            throw new Error('Database connection failed');
+        }
+        const result = await pool.request()
+            .input('videoId', mssql.Int, videoId)
+            .query(`
+                SELECT v.video_name, v.author, u.profile_picture, v.video_date
+                FROM videos v
+                JOIN users u ON v.author = u.userName
+                WHERE v.id = @videoId
+            `);
+
+        const videoDetails = result.recordset[0];
+        if (!videoDetails) {
+            return res.status(404).send('Video not found');
+        }
+
+        res.json(videoDetails);
+    } catch (err) {
+        console.error('Error fetching video details:', err);
+        res.status(500).send('Error fetching video details');
+    }
+};
+
 // Fetch video blob data
 exports.getVideoBlob = async (req, res) => {
   const videoId = req.params.id;

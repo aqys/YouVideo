@@ -93,12 +93,25 @@
         });
 
         document.getElementById('registerButton').addEventListener('click', function() {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('registerForm').style.display = 'flex';
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            // Hide login form
+            loginForm.style.display = 'none';
+            loginForm.classList.remove('active');
+            // Show register form
+            registerForm.style.display = 'flex';
+            requestAnimationFrame(() => {
+                registerForm.classList.add('active');
+            });
         });
 
         document.getElementById('closeLoginForm').addEventListener('click', function() {
-            document.getElementById('loginForm').style.display = 'none';
+            const loginForm = document.getElementById('loginForm');
+            loginForm.classList.remove('active');
+            // Wait for transition to complete before hiding the form
+            setTimeout(() => {
+                loginForm.style.display = 'none';
+            }, 200); // Match this with your transition duration (0.2s = 200ms)
         });
 
         document.getElementById('closeRegisterForm').addEventListener('click', function() {
@@ -139,8 +152,19 @@
                             onerror="this.parentElement.innerHTML = '<div class=\'no-thumbnail\'><span>No Thumbnail</span></div>'"
                         />
                         <div class="video-info">
-                            <p>${video.video_name}</p>
-                            <p class="video-author">${video.author || 'Unknown'}</p>
+                            <div class="author-info">
+                                <img 
+                                    src="/profile-picture/${video.author}"
+                                    alt="${video.author}'s profile"
+                                    class="author-profile-pic"
+                                    onclick="event.stopPropagation(); window.location.href='/profile.html?user=${video.author}'"
+                                    onerror="this.src='/default-profile.png'"
+                                />
+                                <div class="text-info">
+                                    <p class="video-name">${video.video_name}</p>
+                                    <p class="video-author" onclick="event.stopPropagation(); window.location.href='/profile.html?user=${video.author}'">${video.author || 'Unknown'}</p>
+                                </div>
+                            </div>
                         </div>
                     `;
                     
@@ -186,11 +210,30 @@
                 } else {
                     // User is not logged in - show sign in button
                     profileNav.innerHTML = `
-                        <button id="loginButton2" onclick="document.getElementById('loginForm').style.display='flex'">
-                            Sign In
+                        <button id="loginButton2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-in-right" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M6 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 0-1 0v2A1.5 1.5 0 0 0 6.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-8A1.5 1.5 0 0 0 5 3.5v2a.5.5 0 0 0 1 0z"/>
+                                <path fill-rule="evenodd" d="M11.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H1.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+                            </svg>
+                            <span>Sign In</span>
                         </button>
                     `;
-                    document.getElementById('loginButton').style.display = 'none';
+
+                    // Update the loginButton2 click handler
+                    document.getElementById('loginButton2').addEventListener('click', function() {
+                        const loginForm = document.getElementById('loginForm');
+                        const registerForm = document.getElementById('registerForm');
+                        // Hide register form if it's open
+                        registerForm.style.display = 'none';
+                        registerForm.classList.remove('active');
+                        // Show login form
+                        loginForm.style.display = 'flex';
+                        requestAnimationFrame(() => {
+                            loginForm.classList.add('active');
+                        });
+                    });
+
+                    docment.getElementById('loginButton').style.display = 'none';
                     document.getElementById('logoutButton').style.display = 'none';
                     document.getElementById('uploadForm').style.display = 'none';
                     document.getElementById('uploadButton').style.display = 'none';

@@ -11,57 +11,75 @@
     <a class="logo" href="/"><h1>YouVideo</h1></a>
     <div id="videoPlaceholder" style="width: 1280px; height: 720px; background-color: gray; display: none;"></div>
     <video id="videoPlayer" controls style="display: none;"></video>
+    <div id="videoAuthor" class="author-container" style="margin-top: 10px;"></div>
+    <div id="videoDetails" class="video-details" style="margin-top: 10px;"></div>
+    <p>gyatt</p>
     <script>
         async function fetchVideoBlob(videoId) {
-            try {
-                document.getElementById('videoPlaceholder').style.display = 'block';
-                const response = await fetch(`/video/blob/${videoId}`, {
-                    headers: {
-                        'Range': 'bytes=0-'
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+        try {
+            document.getElementById('videoPlaceholder').style.display = 'block';
+            const response = await fetch(`/video/blob/${videoId}`, {
+                headers: {
+                    'Range': 'bytes=0-'
                 }
-                const videoBlob = await response.blob();
-                const videoUrl = URL.createObjectURL(new Blob([videoBlob], { type: 'video/mp4' }));
-                return videoUrl;
-            } catch (error) {
-                console.error('Error fetching video blob:', error);
-            } finally {
-                document.getElementById('videoPlaceholder').style.display = 'none';
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
+            const videoBlob = await response.blob();
+            const videoUrl = URL.createObjectURL(new Blob([videoBlob], { type: 'video/mp4' }));
+            return videoUrl;
+        } catch (error) {
+            console.error('Error fetching video blob:', error);
+        } finally {
+            document.getElementById('videoPlaceholder').style.display = 'none';
         }
+    }
 
-        async function fetchVideoName(videoId) {
-            try {
-                const response = await fetch(`/video/name/${videoId}`);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                return data.videoName;
-            } catch (error) {
-                console.error('Error fetching video name:', error);
+    async function fetchVideoDetails(videoId) {
+        try {
+            const response = await fetch(`/video/details/${videoId}`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
+            const data = await response.json();
+            console.log('Video details:', data); // Debug log
+            return data;
+        } catch (error) {
+            console.error('Error fetching video details:', error);
         }
+    }
 
-        window.onload = async function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const videoId = urlParams.get('id');
-            if (videoId) {
-                const videoName = await fetchVideoName(videoId);
-                if (videoName) {
-                    document.title = `${videoName} - YouVideo`;
-                }
-                const videoUrl = await fetchVideoBlob(videoId);
-                const videoPlayer = document.getElementById('videoPlayer');
-                videoPlayer.src = videoUrl;
-                videoPlayer.style.display = 'block';
-            } else {
-                console.error('Video ID not found in URL');
+    window.onload = async function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const videoId = urlParams.get('id');
+        if (videoId) {
+            const videoDetails = await fetchVideoDetails(videoId);
+            if (videoDetails) {
+                document.title = `${videoDetails.video_name} - YouVideo`;
+                document.getElementById('videoAuthor').innerHTML = `
+                    <img src="/profile-picture/${videoDetails.author}" alt="${videoDetails.author}" class="author-image">
+                    <a href="/profile.html?user=${videoDetails.author}" class="author-name">${videoDetails.author}</a>
+                `;
+                document.getElementById('videoDetails').innerHTML = `
+                    <div class="author-info">
+                        <img src="/profile-picture/${videoDetails.author}" alt="${videoDetails.author}" class="author-profile-pic">
+                        <div class="text-info">
+                            <p class="video-name">${videoDetails.video_name}</p>
+                            <p class="video-author">${videoDetails.author}</p>
+                            <p class="video-date">${new Date(videoDetails.video_date).toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                `;
             }
-        };
+            const videoUrl = await fetchVideoBlob(videoId);
+            const videoPlayer = document.getElementById('videoPlayer');
+            videoPlayer.src = videoUrl;
+            videoPlayer.style.display = 'block';
+        } else {
+            console.error('Video ID not found in URL');
+        }
+    };
     </script>
 </body>
 </html>
