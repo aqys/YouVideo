@@ -5,6 +5,7 @@ body {
     padding: 0;
     color: #fff;
     overflow-x: hidden;
+    padding-top: 80px;
 }
 
 html::-webkit-scrollbar {
@@ -12,11 +13,8 @@ html::-webkit-scrollbar {
 }
 
 html {
-    scrollbar-width: none; /* Hide scrollbar */
-}
-
-html {
-    -ms-overflow-style: none; /* Hide scrollbar */
+    scrollbar-width: none; 
+    -ms-overflow-style: none; 
 }
 
 form {
@@ -142,26 +140,11 @@ form {
     color: #fff;
 }
 
-.video-date {
-    color: #818181;
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin: 0;
-    line-height: 1.2;
-}
-
 .video-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 1vw;
     padding: 1vw;
-}
-
-.video-length {
-    color: #AAAAAA;
-    font-size: 0.9rem;
-    font-weight: 400;
-    margin-top: -2.5vh;
 }
 
 .video-item {
@@ -188,7 +171,10 @@ form {
     font-size: 1rem;
     line-height: 2.2rem;
     max-height: 4.4rem;
+    padding: 0;
+    margin-top: 0;
 }
+
 
 .author-info {
     display: flex;
@@ -205,23 +191,20 @@ form {
     border: 1px solid #ffffff33;
     transition: border-color 0.2s;
     cursor: pointer;
+    aspect-ratio: 1/1;
 }
 
 .author-profile-pic:hover {
     border-color: #ffffff80;
 }
 
-.text-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.video-info {
-    text-align: left;
-    padding: 0;
+.video-name {
     color: #F1F1F1;
-    margin-top: 0;
+    font-weight: 500;
+    font-size: 1rem;
+    margin: 0;
+    line-height: 1.2;
+    text-overflow: ellipsis;
 }
 
 .video-author {
@@ -238,10 +221,56 @@ form {
     color: #d6d6d6;
 }
 
-.video-container {
+
+.text-info {
     display: flex;
     flex-direction: column;
+    gap: 4px;
+}
+
+.video-length {
+    margin-top: -40.5px;
+    margin-left: 10px;
+    text-align: right;
+    width: 100%;
+}
+
+
+.video-container {
+    max-width: 1280px;
+    margin-left: 80px;
+    padding: 20px;
+}
+
+.video-info-container {
+    margin-top: 20px;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    border: 1px solid #333;
+}
+
+
+.video-info-container .author-info {
+    display: flex;
     align-items: center;
+    gap: 15px;
+}
+
+.video-info-container .video-author {
+    text-decoration: none;
+    color: #fff;
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+.video-info-container .video-author:hover {
+    color: #1a73e8;
+}
+
+.video-info-container .video-date {
+    color: #aaa;
+    font-size: 0.9rem;
 }
 
 .no-thumbnail {
@@ -253,15 +282,6 @@ form {
     justify-content: center;
     color: #666;
     border-radius: 8px;
-}
-
-.video-name {
-    color: #F1F1F1;
-    font-weight: 500;
-    font-size: 1rem;
-    margin: 0;
-    line-height: 1.2;
-    text-overflow: ellipsis;
 }
 
 .video-thumbnail {
@@ -307,11 +327,12 @@ form {
     display: inline-block;
     margin-right: 100%;
     height: 10px;
-    margin-bottom: 70px;
+    margin-bottom: 60px;
     position: relative;
     text-decoration: none;
     color: white;
     transition: color 0.15s;
+    margin-left: -10px;
 }
 
 .logo:hover {
@@ -429,14 +450,21 @@ form {
 
 .profile-nav {
     position: absolute;
+    margin-top: -10px;
+    display: flex;
+    align-items: center;
     top: 20px;
     right: 20px;
     z-index: 100;
 }
 
+.profile-nav .profile-picture:hover {
+    border-color: #ffffff80;
+}
+
 .profile-nav img {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     cursor: pointer;
     border: 2px solid #ffffff33;
@@ -466,6 +494,7 @@ form {
 #loginButton2 {
     background-color: transparent;
     border: solid 1px rgba(255, 255, 255, 0.35);
+    border-radius: 20px;
     font-weight: 600;
     color: #ffffff;
     transition: background-color 0.2s, border-color 0.2s;
@@ -473,6 +502,7 @@ form {
     align-items: center;
     gap: 8px;
     padding: 8px 16px;
+    cursor: pointer;
 }
 
 #loginButton2 svg {
@@ -483,4 +513,288 @@ form {
 #loginButton2:hover {
     background-color: rgba(255, 255, 255, 0.125);
     border-color: transparent;
+}
+
+#upload {
+    background-color: rgba(255, 255, 255, 0.125);
+    border: solid 1px transparent;
+    font-weight: 600;
+    color: #ffffff;
+    transition: background-color 0.2s, border-color 0.2s;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 125px;
+    padding: 10px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    position: absolute;
+    top: 20px;
+    right: 100px;
+}
+
+#upload svg {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+}
+
+#upload:hover {
+    background-color: rgba(255, 255, 255, 0.225);
+    border-color: transparent;
+}
+
+#upload:active {
+    background-color: rgba(255, 255, 255, 0.35);
+}
+
+#upload span {
+    vertical-align:middle;
+}
+
+.dropdown-menu {
+    position: fixed; /* Change from absolute to fixed */
+    top: 70px; 
+    right: 20px;
+    background-color: #191919;
+    border-radius: 8px;
+    padding: 8px 0;
+    min-width: 200px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 1001; /* Make sure this is higher than navbar */
+    border: 1px solid #ffffff1a;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-item {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: #ffffff0e;
+}
+
+.dropdown-item svg {
+    width: 24px;
+    height: 24px;
+}
+
+.dropdown-item span {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background-color: rgba(0, 0, 0, 0.95);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #ffffff1a;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+
+/* Upload button styles */
+#upload {
+    background-color: rgba(255, 255, 255, 0.125);
+    border: solid 1px transparent;
+    font-weight: 600;
+    color: #ffffff;
+    transition: background-color 0.2s, border-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-top: -7px;
+}
+
+#upload svg {
+    width: 20px;
+    height: 20px;
+}
+
+#upload:hover {
+    background-color: rgba(255, 255, 255, 0.225);
+}
+
+#upload:active {
+    background-color: rgba(255, 255, 255, 0.35);
+}
+
+.comments-section {
+    margin-top: 20px;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    border: 1px solid #333;
+}
+
+.comments-section h3 {
+    margin-bottom: 10px;
+}
+
+.comment {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #2a2a2a;
+    border-radius: 8px;
+}
+
+.comment p {
+    margin: 5px 0;
+}
+
+#commentForm {
+    margin-top: 20px;
+}
+
+#commentText {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #272727;
+    color: white;
+    margin-bottom: 10px;
+}
+
+#postCommentBtn {
+    padding: 10px 20px;
+    background-color: #FF0033;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#postCommentBtn:hover {
+    background-color: #ffffff;
+    color: #000;
+}
+
+.video-interactions {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.interaction-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #272727;
+    border: none;
+    border-radius: 20px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.interaction-btn:hover {
+    background: #383838;
+}
+
+.interaction-btn.active {
+    background: #FF0033;
+}
+
+.interaction-btn svg {
+    fill: currentColor;
+}
+
+.subscription-info {
+    margin-top: 20px;
+}
+
+.subscribe-btn {
+    padding: 10px 20px;
+    background: #FF0033;
+    border: none;
+    border-radius: 20px;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.subscribe-btn.subscribed {
+    background: #272727;
+}
+
+.subscribe-btn:hover {
+    background: #ffffff;
+    color: #000;
+}
+
+#subscriberCount {
+    margin-left: 10px;
+    color: #aaa;
+}
+
+.subscribe-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.error-message {
+    text-align: center;
+    padding: 20px;
+    background: rgba(255, 0, 0, 0.1);
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.error-message button {
+    margin-top: 10px;
+    padding: 8px 16px;
+    background: #FF0033;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.error-message button:hover {
+    background: #ffffff;
+    color: #000;
+}
+
+.no-videos {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+    font-size: 1.2em;
 }

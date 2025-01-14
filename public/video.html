@@ -8,78 +8,366 @@
     <title>YouVideo</title>
 </head>
 <body>
-    <a class="logo" href="/"><h1>YouVideo</h1></a>
-    <div id="videoPlaceholder" style="width: 1280px; height: 720px; background-color: gray; display: none;"></div>
-    <video id="videoPlayer" controls style="display: none;"></video>
-    <div id="videoAuthor" class="author-container" style="margin-top: 10px;"></div>
-    <div id="videoDetails" class="video-details" style="margin-top: 10px;"></div>
-    <p>gyatt</p>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a class="logo" href="/"><h1>YouVideo</h1></a>
+        </div>
+        <div class="nav-right">
+            <div class="profile-nav" id="profileNav"></div>
+        </div>
+    </nav>
+    <div class="dropdown-menu" id="dropdownMenu">
+        <div class="dropdown-item" id="yourChannel">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+            </svg>
+            <span>Your channel</span>
+        </div>
+        <div class="dropdown-item" id="signOut">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/>
+                <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+            </svg>
+            <span>Sign out</span>
+        </div>
+    </div>
+    <div class="video-container">
+        <div id="videoPlaceholder" style="width: 1280px; height: 720px; background-color: gray; display: none;"></div>
+        <video id="videoPlayer" controls style="display: none;"></video>
+        
+        <!-- Video Information Container -->
+        <div class="video-info-container">
+            <h2 id="videoName" class="video-name"></h2>
+            <div class="author-info">
+                <img id="authorProfilePic" class="author-profile-pic" alt="Author Profile">
+                <div class="text-info">
+                    <a id="authorName" class="video-author"></a>
+                    <p id="uploadDate" class="video-date"></p>
+                </div>
+                <div class="video-stats">
+                    <span id="viewCount">0 views</span>
+                </div>
+            </div>
+            <div class="video-interactions">
+                <button id="likeBtn" class="interaction-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
+                    </svg>
+                    <span id="likeCount">0</span>
+                </button>
+                <button id="dislikeBtn" class="interaction-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/>
+                    </svg>
+                    <span id="dislikeCount">0</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        async function fetchVideoBlob(videoId) {
-        try {
-            document.getElementById('videoPlaceholder').style.display = 'block';
-            const response = await fetch(`/video/blob/${videoId}`, {
-                headers: {
-                    'Range': 'bytes=0-'
+        // Like/Dislike System
+        async function loadVideoInteractions() {
+            try {
+                const videoId = new URLSearchParams(window.location.search).get('id');
+                const response = await fetch(`/api/video/interactions/${videoId}`);
+                const data = await response.json();
+                
+                document.getElementById('likeCount').textContent = data.likes;
+                document.getElementById('dislikeCount').textContent = data.dislikes;
+                
+                if (data.userInteraction === 'LIKE') {
+                    document.getElementById('likeBtn').classList.add('active');
+                } else if (data.userInteraction === 'DISLIKE') {
+                    document.getElementById('dislikeBtn').classList.add('active');
                 }
-            });
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+            } catch (error) {
+                console.error('Error loading interactions:', error);
             }
-            const videoBlob = await response.blob();
-            const videoUrl = URL.createObjectURL(new Blob([videoBlob], { type: 'video/mp4' }));
-            return videoUrl;
-        } catch (error) {
-            console.error('Error fetching video blob:', error);
-        } finally {
-            document.getElementById('videoPlaceholder').style.display = 'none';
         }
-    }
 
-    async function fetchVideoDetails(videoId) {
-        try {
-            const response = await fetch(`/video/details/${videoId}`);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+        // Add event listeners for like/dislike buttons
+        document.getElementById('likeBtn').addEventListener('click', async () => {
+            try {
+                const videoId = new URLSearchParams(window.location.search).get('id');
+                const response = await fetch('/api/video/interact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        videoId: videoId,
+                        interactionType: 'LIKE'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('likeCount').textContent = data.likes;
+                    document.getElementById('dislikeCount').textContent = data.dislikes;
+                    document.getElementById('likeBtn').classList.toggle('active');
+                    document.getElementById('dislikeBtn').classList.remove('active');
+                } else if (response.status === 401) {
+                    alert('Please log in to like videos');
+                }
+            } catch (error) {
+                console.error('Error:', error);
             }
-            const data = await response.json();
-            console.log('Video details:', data); // Debug log
-            return data;
-        } catch (error) {
-            console.error('Error fetching video details:', error);
-        }
-    }
+        });
 
-    window.onload = async function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const videoId = urlParams.get('id');
-        if (videoId) {
-            const videoDetails = await fetchVideoDetails(videoId);
-            if (videoDetails) {
-                document.title = `${videoDetails.video_name} - YouVideo`;
-                document.getElementById('videoAuthor').innerHTML = `
-                    <img src="/profile-picture/${videoDetails.author}" alt="${videoDetails.author}" class="author-image">
-                    <a href="/profile.html?user=${videoDetails.author}" class="author-name">${videoDetails.author}</a>
-                `;
-                document.getElementById('videoDetails').innerHTML = `
-                    <div class="author-info">
-                        <img src="/profile-picture/${videoDetails.author}" alt="${videoDetails.author}" class="author-profile-pic">
-                        <div class="text-info">
-                            <p class="video-name">${videoDetails.video_name}</p>
-                            <p class="video-author">${videoDetails.author}</p>
-                            <p class="video-date">${new Date(videoDetails.video_date).toLocaleDateString()}</p>
+        document.getElementById('dislikeBtn').addEventListener('click', async () => {
+            try {
+                const videoId = new URLSearchParams(window.location.search).get('id');
+                const response = await fetch('/api/video/interact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        videoId: videoId,
+                        interactionType: 'DISLIKE'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('likeCount').textContent = data.likes;
+                    document.getElementById('dislikeCount').textContent = data.dislikes;
+                    document.getElementById('dislikeBtn').classList.toggle('active');
+                    document.getElementById('likeBtn').classList.remove('active');
+                } else if (response.status === 401) {
+                    alert('Please log in to dislike videos');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        // View Count System
+        async function recordView() {
+            try {
+                const videoId = new URLSearchParams(window.location.search).get('id');
+                const response = await fetch(`/api/video/view/${videoId}`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                document.getElementById('viewCount').textContent = 
+                    `${data.views} ${data.views === 1 ? 'view' : 'views'}`;
+            } catch (error) {
+                console.error('Error recording view:', error);
+            }
+        }
+
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('/check-login');
+                const data = await response.json();
+                const profileNav = document.getElementById('profileNav');
+                const dropdownMenu = document.getElementById('dropdownMenu');
+                
+                if (data.loggedIn) {
+                    // User is logged in
+                    profileNav.innerHTML = `
+                        <img 
+                            src="/profile-picture/${data.user.userName}?${new Date().getTime()}" 
+                            alt="Profile" 
+                            onerror="this.src='/default-profile.png'"
+                            class="profile-picture"
+                        />
+                    `;
+
+                    // Update dropdown menu items for logged-in state
+                    dropdownMenu.innerHTML = `
+                        <div class="dropdown-item" id="yourChannel">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                                <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                            </svg>
+                            <span>Your channel</span>
                         </div>
-                    </div>
-                `;
+                        <div class="dropdown-item" id="signOut">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/>
+                                <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+                            </svg>
+                            <span>Sign out</span>
+                        </div>
+                    `;
+                } else {
+                    // User is not logged in
+                    profileNav.innerHTML = `
+                        <img 
+                            src="/default-profile.png" 
+                            alt="Profile" 
+                            class="profile-picture"
+                        />
+                    `;
+
+                    // Update dropdown menu items for logged-out state
+                    dropdownMenu.innerHTML = `
+                        <div class="dropdown-item" id="signIn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-in-right" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M6 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 0-1 0v2A1.5 1.5 0 0 0 6.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-8A1.5 1.5 0 0 0 5 3.5v2a.5.5 0 0 0 1 0z"/>
+                                <path fill-rule="evenodd" d="M11.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H1.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+                            </svg>
+                            <span>Sign in</span>
+                        </div>
+                    `;
+                }
+                
+                // Remove any existing listeners
+                const oldProfileNav = document.getElementById('profileNav');
+                const newProfileNav = oldProfileNav.cloneNode(true);
+                oldProfileNav.parentNode.replaceChild(newProfileNav, oldProfileNav);
+                
+                // Add click listener to new profile nav
+                newProfileNav.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Profile clicked');
+                    dropdownMenu.classList.toggle('show');
+                });
+
+                // Add click listener to document to close dropdown
+                document.addEventListener('click', function(e) {
+                    if (!dropdownMenu.contains(e.target) && !newProfileNav.contains(e.target)) {
+                        dropdownMenu.classList.remove('show');
+                    }
+                });
+
+                attachDropdownListeners();
+            } catch (error) {
+                console.error('Error checking login status:', error);
             }
-            const videoUrl = await fetchVideoBlob(videoId);
-            const videoPlayer = document.getElementById('videoPlayer');
-            videoPlayer.src = videoUrl;
-            videoPlayer.style.display = 'block';
-        } else {
-            console.error('Video ID not found in URL');
         }
-    };
+
+        // Handle dropdown functionality
+        function attachDropdownListeners() {
+    const yourChannel = document.getElementById('yourChannel');
+    const signOut = document.getElementById('signOut');
+    const signIn = document.getElementById('signIn');
+
+    if (yourChannel) {
+        yourChannel.addEventListener('click', () => {
+            window.location.href = '/profile.html';
+        });
+    }
+
+    if (signOut) {
+        signOut.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/logout', {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        });
+    }
+
+    if (signIn) {
+        signIn.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+    }
+}
+
+        // Helper function to handle clicks outside the dropdown
+        function handleOutsideClick(e) {
+            const profileNav = document.getElementById('profileNav');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            if (!dropdownMenu.contains(e.target) && !profileNav.contains(e.target)) {
+                dropdownMenu.classList.remove('show');
+            }
+        }
+
+        async function fetchVideoBlob(videoId) {
+            try {
+                document.getElementById('videoPlaceholder').style.display = 'block';
+                const response = await fetch(`/video/blob/${videoId}`, {
+                    headers: {
+                        'Range': 'bytes=0-'
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const videoBlob = await response.blob();
+                const videoUrl = URL.createObjectURL(new Blob([videoBlob], { type: 'video/mp4' }));
+                return videoUrl;
+            } catch (error) {
+                console.error('Error fetching video blob:', error);
+            } finally {
+                document.getElementById('videoPlaceholder').style.display = 'none';
+            }
+        }
+
+        async function fetchVideoDetails(videoId) {
+            try {
+                // First get basic video details (matching index.html's approach)
+                const videoResponse = await fetch('/videos');
+                const videos = await videoResponse.json();
+                const videoDetails = videos.find(video => video.id === parseInt(videoId));
+                
+                if (!videoDetails) {
+                    throw new Error('Video not found');
+                }
+
+                return {
+                    video_name: videoDetails.video_name,
+                    author: videoDetails.author,
+                    video_date: videoDetails.upload_date // Note: This might be undefined if not included in /videos endpoint
+                };
+            } catch (error) {
+                console.error('Error fetching video details:', error);
+            }
+        }
+
+        window.onload = async function() {
+            await checkLoginStatus();
+            const videoDetails = await loadVideoDetails();
+            await loadVideoInteractions();
+            await recordView();
+        };
+
+        window.onload = async function() {
+            await checkLoginStatus(); // Add this line
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoId = urlParams.get('id');
+            
+            if (videoId) {
+                const videoDetails = await fetchVideoDetails(videoId);
+                if (videoDetails) {
+                    // Update page title
+                    document.title = `${videoDetails.video_name} - YouVideo`;
+                    
+                    // Update video details
+                    document.getElementById('videoName').textContent = videoDetails.video_name;
+                    document.getElementById('authorName').textContent = videoDetails.author;
+                    document.getElementById('authorName').href = `/profile.html?user=${videoDetails.author}`;
+                    document.getElementById('authorProfilePic').src = `/profile-picture/${videoDetails.author}`;
+                    
+                    // Only show date if available
+                    if (videoDetails.video_date) {
+                        document.getElementById('uploadDate').textContent = new Date(videoDetails.video_date).toLocaleDateString();
+                    } else {
+                        document.getElementById('uploadDate').style.display = 'none';
+                    }
+                }
+
+                // Load video
+                const videoUrl = await fetchVideoBlob(videoId);
+                const videoPlayer = document.getElementById('videoPlayer');
+                videoPlayer.src = videoUrl;
+                videoPlayer.style.display = 'block';
+            } else {
+                console.error('Video ID not found in URL');
+            }
+        };
     </script>
 </body>
 </html>

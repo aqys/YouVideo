@@ -4,6 +4,7 @@ const mssql = require('mssql');
 const path = require('path');
 const dotenv = require('dotenv');
 const videoController = require('./videoController');
+const { formatVideoLength } = require('./videoController');
 const ffmpeg = require('fluent-ffmpeg');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
@@ -14,8 +15,6 @@ dotenv.config();
 
 // Set the path to the ffmpeg executable
 ffmpeg.setFfmpegPath('C:/ffmpeg/bin/ffmpeg.exe');
-
-app.get('/video/details/:id', videoController.getVideoDetails);
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -50,11 +49,6 @@ const poolPromise = mssql.connect(dbConfig)
     return null; // Return null if connection fails
   });
 
-// Export poolPromise
-module.exports = {
-  poolPromise
-};
-
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -67,24 +61,30 @@ app.use(session({
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
-
+/*
 app.get('/videos', async (req, res) => {
   try {
-      const pool = await poolPromise;
-      if (!pool) {
-          throw new Error('Database connection failed');
-      }
-      // Include video length in the query
-      const result = await pool.request()
-          .query('SELECT id, video_name, author, length FROM videos ORDER BY NEWID()');
-      res.json(result.recordset);
+    const pool = await poolPromise;
+    if (!pool) {
+      throw new Error('Database connection failed');
+    }
+    const result = await pool.request()
+      .query('SELECT id, video_name, author, video_length FROM videos ORDER BY NEWID()');
+
+    const videos = result.recordset.map(video => {
+      video.video_length = formatVideoLength(video.video_length);
+      return video;
+    });
+
+    res.json(videos);
   } catch (err) {
-      console.error('Error fetching video list:', err);
-      res.status(500).send('Error fetching video list');
+    console.error('Error fetching video list:', err.message);
+    res.status(500).json({ error: 'Error fetching video list' });
   }
 });
+*/
+app.get('/videos', videoController.getAllVideoBlobs);
 
-app.get('/video/blob/:id', videoController.getVideoBlob);
 
 // Set EJS as the view engine (you can use other templating engines)
 app.set('view engine', 'ejs');
@@ -102,8 +102,8 @@ const upload = multer({ storage: storage });
 app.get('/thumbnail/:id', videoController.getThumbnail);
 app.get('/', videoController.homePage);
 app.post('/upload', upload.single('videoFile'), videoController.uploadVideo);
-app.get('/video/blob/:id', videoController.getVideoBlob);
-app.get('/videos', videoController.getAllVideoBlobs);
+app.get('/videos', videoController.getAllVideoBlobs.bind(videoController));
+app.get('/video/blob/:id', videoController.getVideoBlob.bind(videoController));
 app.get('/video/:id', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'video.html'));
 });
@@ -205,14 +205,10 @@ app.post('/register', async (req, res) => {
   }
 });
 
-status:
-
-
-
 
 app.get('/debug-session', (req, res) => {
     console.log('Full session:', req.session);
-    console.log('Session ID:', req.sessionID);
+    console.log('Session ID:', req.sessionID)
     console.log('Session user:', req.session.user);
     res.json({
         sessionId: req.sessionID,

@@ -8,10 +8,37 @@
     <title>YouVideo</title>
 </head>
 <body>
-    <a class="logo" href="/"><h1>YouVideo</h1></a>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a class="logo" href="/"><h1>YouVideo</h1></a>
+        </div>
+        <div class="nav-right">
+            <button id="upload" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cloud-arrow-up" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M7.646 5.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708z"/>
+                    <path d="M4.406 3.342A5.53 5.53 0 0 1 8 2c2.69 0 4.923 2 5.166 4.579C14.758 6.804 16 8.137 16 9.773 16 11.569 14.502 13 12.687 13H3.781C1.708 13 0 11.366 0 9.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383m.653.757c-.757.653-1.153 1.44-1.153 2.056v.448l-.445.049C2.064 6.805 1 7.952 1 9.318 1 10.785 2.23 12 3.781 12h8.906C13.98 12 15 10.988 15 9.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 4.825 10.328 3 8 3a4.53 4.53 0 0 0-2.941 1.1z"/>
+                </svg>
+                <span>Upload</span>
+            </button>
+            <div class="profile-nav" id="profileNav"></div>
+        </div>
+    </nav>
     
-    <div class="profile-nav" id="profileNav">
-
+    <div class="dropdown-menu" id="dropdownMenu">
+        <div class="dropdown-item" id="yourChannel">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+            </svg>
+            <span>Your channel</span>
+        </div>
+        <div class="dropdown-item" id="signOut">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/>
+                <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+            </svg>
+            <span>Sign out</span>
+        </div>
     </div>
     <button id="loginButton" style="display: none;">Login</button>
 
@@ -23,11 +50,11 @@
             <form class="form" action="/login" method="POST">
                 <div class="inputBox">
                     <i>Username</i>
-                    <input type="text" name="userName" id="userName" placeholder="Username" autocomplete="off" required autocomplete="username"/>
+                    <input type="text" name="userName" id="userName" placeholder="Username" required autocomplete="username">
                 </div>
                 <div class="inputBox">
                     <i>Password</i>
-                    <input type="password" name="userPassword" id="userPassword" placeholder="Password" autocomplete="off" required autocomplete="current-password"/>
+                    <input type="password" name="userPassword" id="userPassword" placeholder="Password" required autocomplete="current-password">
                 </div>
                 <input id="loginButton" type="submit" value="Login">
             </form>
@@ -43,11 +70,11 @@
             <form class="form" action="/register" method="POST">
                 <div class="inputBox">
                     <i>Username</i>
-                    <input type="text" name="userName" id="registerUserName" placeholder="Username" autocomplete="off" required autocomplete="username"/>
+                    <input type="text" name="userName" id="registerUserName" placeholder="Username" required autocomplete="username">
                 </div>
                 <div class="inputBox">
                     <i>Password</i>
-                    <input type="password" name="userPassword" id="registerUserPassword" placeholder="Password" autocomplete="off" required autocomplete="new-password"/>
+                    <input type="password" name="userPassword" id="registerUserPassword" placeholder="Password" required autocomplete="new-password">
                 </div>
                 <div class="inputBox">
                     <i>Confirm Password</i>
@@ -67,7 +94,13 @@
         </form>
     </div>
     
-    <button id="uploadButton" style="display: none;">Upload Video</button>
+    <button style="display: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cloud-arrow-up" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M7.646 5.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708z"/>
+            <path d="M4.406 3.342A5.53 5.53 0 0 1 8 2c2.69 0 4.923 2 5.166 4.579C14.758 6.804 16 8.137 16 9.773 16 11.569 14.502 13 12.687 13H3.781C1.708 13 0 11.366 0 9.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383m.653.757c-.757.653-1.153 1.44-1.153 2.056v.448l-.445.049C2.064 6.805 1 7.952 1 9.318 1 10.785 2.23 12 3.781 12h8.906C13.98 12 15 10.988 15 9.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 4.825 10.328 3 8 3a4.53 4.53 0 0 0-2.941 1.1z"/>
+        </svg>
+        <span>Upload</span>
+    </button>
 
     <h2>Videos</h2>
     <div id="videoGrid" class="video-grid"></div>
@@ -95,30 +128,28 @@
         document.getElementById('registerButton').addEventListener('click', function() {
             const loginForm = document.getElementById('loginForm');
             const registerForm = document.getElementById('registerForm');
-            // Hide login form
             loginForm.style.display = 'none';
             loginForm.classList.remove('active');
-            // Show register form
             registerForm.style.display = 'flex';
             requestAnimationFrame(() => {
                 registerForm.classList.add('active');
             });
         });
 
-        document.getElementById('closeLoginForm').addEventListener('click', function() {
-            const loginForm = document.getElementById('loginForm');
-            loginForm.classList.remove('active');
-            // Wait for transition to complete before hiding the form
-            setTimeout(() => {
-                loginForm.style.display = 'none';
-            }, 200); // Match this with your transition duration (0.2s = 200ms)
-        });
 
-        document.getElementById('closeRegisterForm').addEventListener('click', function() {
-            document.getElementById('registerForm').style.display = 'none';
-        });
+    document.getElementById('closeLoginForm').addEventListener('click', function() {
+        const loginForm = document.getElementById('loginForm');
+        loginForm.classList.remove('active');
+        setTimeout(() => {
+            loginForm.style.display = 'none';
+        }, 200);
+    });
 
-        document.getElementById('uploadButton').addEventListener('click', function() {
+    document.getElementById('closeRegisterForm').addEventListener('click', function() {
+        document.getElementById('registerForm').style.display = 'none';
+    });
+
+        document.getElementById('upload').addEventListener('click', function() {
             document.getElementById('videoFile').click();
         });
 
@@ -133,47 +164,61 @@
         async function populateVideoGrid() {
             try {
                 const response = await fetch('/videos');
-                const videos = await response.json();
-                const videoGrid = document.getElementById('videoGrid');
-                videoGrid.innerHTML = '';
-                
-                // Randomize the videos array
-                const randomizedVideos = videos.sort(() => Math.random() - 0.5);
-                
-                randomizedVideos.forEach(video => {
-                    const videoElement = document.createElement('div');
-                    videoElement.classList.add('video-item');
+                const text = await response.text();
+                console.log('Raw response:', text); // Add this line
+                try {
+                    const videos = JSON.parse(text);
+                    console.log('Parsed videos:', videos); // Add this line
+                    console.log('Received videos:', videos); // Debug log
+                    const videoGrid = document.getElementById('videoGrid');
+                    videoGrid.innerHTML = '';
                     
-                    videoElement.innerHTML = `
-                        <img 
-                            src="/thumbnail/${video.id}"
-                            alt="${video.video_name}"
-                            class="video-thumbnail"
-                            onerror="this.parentElement.innerHTML = '<div class=\'no-thumbnail\'><span>No Thumbnail</span></div>'"
-                        />
-                        <div class="video-info">
-                            <div class="author-info">
-                                <img 
-                                    src="/profile-picture/${video.author}"
-                                    alt="${video.author}'s profile"
-                                    class="author-profile-pic"
-                                    onclick="event.stopPropagation(); window.location.href='/profile.html?user=${video.author}'"
-                                    onerror="this.src='/default-profile.png'"
-                                />
-                                <div class="text-info">
-                                    <p class="video-name">${video.video_name}</p>
-                                    <p class="video-author" onclick="event.stopPropagation(); window.location.href='/profile.html?user=${video.author}'">${video.author || 'Unknown'}</p>
+                    // Randomize the videos array
+                    const randomizedVideos = videos.sort(() => Math.random() - 0.5);
+                    
+                    randomizedVideos.forEach(video => {
+                        console.log('Processing video:', video);
+                        const videoElement = document.createElement('div');
+                        videoElement.classList.add('video-item');
+                        
+                        videoElement.innerHTML = `
+                            <img 
+                                src="/thumbnail/${video.id}"
+                                alt="${video.video_name}"
+                                class="video-thumbnail"
+                                onerror="this.parentElement.innerHTML = '<div class=\'no-thumbnail\'><span>No Thumbnail</span></div>'"
+                            />
+                            <div class="video-info">
+                                <div class="author-info">
+                                    <img 
+                                        src="/profile-picture/${video.author}"
+                                        alt="${video.author}'s profile"
+                                        class="author-profile-pic"
+                                        onclick="event.stopPropagation(); window.location.href='/profile.html?user=${video.author}'"
+                                        onerror="this.src='/default-profile.png'"
+                                    />
+                                    <div class="text-info">
+                                        <p class="video-name">${video.video_name}</p>
+                                        <p class="video-author" onclick="event.stopPropagation(); window.location.href='/profile.html?user=${video.author}'">${video.author || 'Unknown'}</p>
+                                    </div>
+                                        <p class="video-length">${video.video_length}</p>
+
                                 </div>
                             </div>
-                        </div>
-                    `;
-                    
-                    videoElement.addEventListener('click', () => {
-                        window.location.href = `/video.html?id=${video.id}`;
+                        `;
+                        
+                        videoElement.addEventListener('click', () => {
+                            window.location.href = `/video.html?id=${video.id}`;
+                        });
+                        
+                        videoGrid.appendChild(videoElement);
                     });
-                    
-                    videoGrid.appendChild(videoElement);
-                });
+                } catch (jsonError) {
+                    console.error('Error parsing JSON:', jsonError);
+                    console.error('Response text:', text);
+                    document.getElementById('videoGrid').innerHTML = 
+                        '<div class="error">Error loading videos</div>';
+                }
             } catch (error) {
                 console.error('Error loading videos:', error);
                 document.getElementById('videoGrid').innerHTML = 
@@ -184,6 +229,7 @@
         window.onload = function() {
             populateVideoGrid();
             checkLoginStatus();
+            attachDropdownListeners();
         };
 
         async function checkLoginStatus() {
@@ -191,59 +237,160 @@
                 const response = await fetch('/check-login');
                 const data = await response.json();
                 const profileNav = document.getElementById('profileNav');
+                const dropdownMenu = document.getElementById('dropdownMenu');
+                const uploadButton = document.getElementById('upload');
                 
                 if (data.loggedIn) {
-                    // User is logged in - show profile picture
+                    // User is logged in - show profile picture and dropdown
                     profileNav.innerHTML = `
                         <img 
                             src="/profile-picture/${data.user.userName}?${new Date().getTime()}" 
                             alt="Profile" 
                             onerror="this.src='/default-profile.png'"
-                            onclick="window.location.href='/profile.html'"
+                            class="profile-picture"
                         />
                     `;
-                    document.getElementById('loginButton').style.display = 'none';
-                    document.getElementById('logoutButton').style.display = 'block';
-                    document.getElementById('uploadForm').style.display = 'block';
-                    document.getElementById('uploadButton').style.display = 'block';
-                    document.getElementById('author').value = data.user.userName;
-                } else {
-                    // User is not logged in - show sign in button
-                    profileNav.innerHTML = `
-                        <button id="loginButton2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-in-right" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M6 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 0-1 0v2A1.5 1.5 0 0 0 6.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-8A1.5 1.5 0 0 0 5 3.5v2a.5.5 0 0 0 1 0z"/>
-                                <path fill-rule="evenodd" d="M11.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H1.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+                    if(uploadButton) uploadButton.style.display = 'flex';
+                    
+                    // Update dropdown menu items for logged-in state
+                    dropdownMenu.innerHTML = `
+                        <div class="dropdown-item" id="yourChannel">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                                <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
                             </svg>
-                            <span>Sign In</span>
-                        </button>
+                            <span>Your channel</span>
+                        </div>
+                        <div class="dropdown-item" id="signOut">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/>
+                                <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+                            </svg>
+                            <span>Sign out</span>
+                        </div>
                     `;
 
-                    // Update the loginButton2 click handler
-                    document.getElementById('loginButton2').addEventListener('click', function() {
-                        const loginForm = document.getElementById('loginForm');
-                        const registerForm = document.getElementById('registerForm');
-                        // Hide register form if it's open
-                        registerForm.style.display = 'none';
-                        registerForm.classList.remove('active');
-                        // Show login form
-                        loginForm.style.display = 'flex';
-                        requestAnimationFrame(() => {
-                            loginForm.classList.add('active');
+                    // Add click event listener for profile picture to toggle dropdown
+                    const profilePic = profileNav.querySelector('img');
+                    if(profilePic) {
+                        profilePic.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            dropdownMenu.classList.toggle('show');
                         });
+                    }
+
+                    // Add click event listener to close dropdown when clicking outside
+                    document.addEventListener('click', (e) => {
+                        if (!dropdownMenu.contains(e.target) && !profileNav.contains(e.target)) {
+                            dropdownMenu.classList.remove('show');
+                        }
                     });
 
-                    docment.getElementById('loginButton').style.display = 'none';
-                    document.getElementById('logoutButton').style.display = 'none';
-                    document.getElementById('uploadForm').style.display = 'none';
-                    document.getElementById('uploadButton').style.display = 'none';
+                    // Add event listeners for dropdown items
+                    const yourChannel = document.getElementById('yourChannel');
+                    const signOut = document.getElementById('signOut');
+
+                    if(yourChannel) {
+                        yourChannel.addEventListener('click', () => {
+                            window.location.href = '/profile.html';
+                        });
+                    }
+
+                    if(signOut) {
+                        signOut.addEventListener('click', async () => {
+                            try {
+                                const response = await fetch('/logout', {
+                                    method: 'POST'
+                                });
+                                if (response.ok) {
+                                    window.location.reload();
+                                }
+                            } catch (error) {
+                                console.error('Error logging out:', error);
+                            }
+                        });
+                    }
+
+                } else {
+                    // User is not logged in - show login button
+                    profileNav.innerHTML = `
+                        <button id="loginButton2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                                <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                                <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                            </svg>
+                            Sign in
+                        </button>
+                    `;
+                    if(dropdownMenu) dropdownMenu.style.display = 'none';
+                    if(uploadButton) uploadButton.style.display = 'none';
+
+                    // Add event listener to the login button
+                    const loginButton2 = document.getElementById('loginButton2');
+                    if(loginButton2) {
+                        loginButton2.addEventListener('click', () => {
+                            const loginForm = document.getElementById('loginForm');
+                            if(loginForm) {
+                                loginForm.style.display = 'flex';
+                                requestAnimationFrame(() => {
+                                    loginForm.classList.add('active');
+                                });
+                            }
+                        });
+                    }
                 }
             } catch (error) {
                 console.error('Error checking login status:', error);
             }
         }
 
-        // Handle login form submission
+        function attachDropdownListeners() {
+            const profileNav = document.getElementById('profileNav');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+
+            // Profile picture click listener
+            const profilePic = profileNav.querySelector('img');
+            if (profilePic) {
+                profilePic.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdownMenu.classList.toggle('show');
+                });
+            }
+
+            // Document click listener to close dropdown
+            document.addEventListener('click', (e) => {
+                if (!dropdownMenu.contains(e.target) && !profileNav.contains(e.target)) {
+                    dropdownMenu.classList.remove('show');
+                }
+            });
+
+            // Dropdown item listeners
+            const yourChannel = document.getElementById('yourChannel');
+            const signOut = document.getElementById('signOut');
+
+            if (yourChannel) {
+                yourChannel.addEventListener('click', () => {
+                    window.location.href = '/profile.html';
+                });
+            }
+
+            if (signOut) {
+                signOut.addEventListener('click', async () => {
+                    try {
+                        const response = await fetch('/logout', {
+                            method: 'POST'
+                        });
+                        if (response.ok) {
+                            window.location.reload();
+                        }
+                    } catch (error) {
+                        console.error('Error logging out:', error);
+                    }
+                });
+            }
+        }
+
+        // Modify your login form submit handler
         document.getElementById('loginForm').addEventListener('submit', async function(event) {
             event.preventDefault();
             const userName = document.getElementById('userName').value;
@@ -259,16 +406,8 @@
                 });
 
                 if (response.ok) {
-                    const user = await response.json();
-                    console.log('User data:', user); // Debug log
-                    
-                    // Verify session was set
-                    const sessionCheck = await fetch('/debug-session');
-                    const sessionData = await sessionCheck.json();
-                    console.log('Session after login:', sessionData); // Debug log
-                    
-                    document.getElementById('loginForm').style.display = 'none';
-                    checkLoginStatus();
+                    // Reload the page after successful login
+                    window.location.reload();
                 } else {
                     const error = await response.json();
                     alert(error.error);
@@ -278,30 +417,61 @@
             }
         });
 
-    document.getElementById('registerForm').addEventListener('submit', async function(event) {
-        event.preventDefault();
-        const userName = document.getElementById('registerUserName').value;
-        const userPassword = document.getElementById('registerUserPassword').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
+        document.getElementById('registerForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const userName = document.getElementById('registerUserName').value;
+            const userPassword = document.getElementById('registerUserPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
 
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ userName, userPassword, confirmPassword })
+                });
+
+                if (response.ok) {
+                    document.getElementById('registerForm').style.display = 'none';
+                    await checkLoginStatus();
+                } else {
+                    const error = await response.json();
+                    alert(error.error);
+                }
+            } catch (error) {
+                console.error('Error during registration:', error);
+            }
+        });
+
+    // Toggle dropdown when clicking profile picture
+    profileNav.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('show');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!dropdownMenu.contains(e.target) && !profileNav.contains(e.target)) {
+            dropdownMenu.classList.remove('show');
+        }
+    });
+
+    // Handle dropdown item clicks
+    document.getElementById('yourChannel').addEventListener('click', () => {
+        window.location.href = '/profile.html';
+    });
+
+    document.getElementById('signOut').addEventListener('click', async () => {
         try {
-            const response = await fetch('/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ userName, userPassword, confirmPassword })
+            const response = await fetch('/logout', {
+                method: 'POST'
             });
-
             if (response.ok) {
-                document.getElementById('registerForm').style.display = 'none'; // Hide register form
-                checkLoginStatus();
-            } else {
-                const error = await response.json();
-                alert(error.error);
+                window.location.reload();
             }
         } catch (error) {
-            console.error('Error during registration:', error);
+            console.error('Error logging out:', error);
         }
     });
     </script>
