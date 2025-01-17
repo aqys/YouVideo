@@ -227,7 +227,6 @@ form {
 .text-info {
     display: flex;
     flex-direction: column;
-    gap: 4px;
 }
 
 .video-length {
@@ -256,7 +255,8 @@ form {
     margin: 0;
     margin-top: 0.15vw;
     line-height: 1.2;
-    text-overflow: ellipsis;
+    text-overflow: clip;
+    width: 100%;
 }
 
 .video-author-home {
@@ -635,6 +635,10 @@ form {
 .dropdown-item span {
     font-size: 14px;
     font-weight: 500;
+}
+
+#video-intro {
+    padding: 0 10px;
 }
 
 .navbar {
