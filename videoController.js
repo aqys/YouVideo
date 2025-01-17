@@ -143,28 +143,28 @@ exports.getSubscriptionStatus = async (req, res) => {
   const currentUser = req.session.user ? req.session.user.userName : null;
 
   try {
-    const pool = await poolPromise;
-    if (!pool) {
-      throw new Error('Database connection failed');
-    }
+      const pool = await poolPromise;
+      if (!pool) {
+          throw new Error('Database connection failed');
+      }
 
-    const subscriptionResult = await pool.request()
-      .input('subscriber_id', mssql.NVarChar, currentUser)
-      .input('channel_id', mssql.NVarChar, userName)
-      .query('SELECT * FROM subscriptions WHERE subscriber_id = @subscriber_id AND channel_id = @channel_id');
+      const subscriptionResult = await pool.request()
+          .input('subscriber_id', mssql.NVarChar, currentUser)
+          .input('channel_id', mssql.NVarChar, userName)
+          .query('SELECT * FROM subscriptions WHERE subscriber_id = @subscriber_id AND channel_id = @channel_id');
 
-    const isSubscribed = subscriptionResult.recordset.length > 0;
+      const isSubscribed = subscriptionResult.recordset.length > 0;
 
-    const countResult = await pool.request()
-      .input('channel_id', mssql.NVarChar, userName)
-      .query('SELECT COUNT(*) AS subscriberCount FROM subscriptions WHERE channel_id = @channel_id');
+      const countResult = await pool.request()
+          .input('channel_id', mssql.NVarChar, userName)
+          .query('SELECT COUNT(*) AS subscriberCount FROM subscriptions WHERE channel_id = @channel_id');
 
-    const subscriberCount = countResult.recordset[0].subscriberCount;
+      const subscriberCount = countResult.recordset[0].subscriberCount;
 
-    res.json({ isSubscribed, subscriberCount });
+      res.json({ isSubscribed, subscriberCount, currentUser });
   } catch (err) {
-    console.error('Error fetching subscription status:', err);
-    res.status(500).json({ error: 'Error fetching subscription status' });
+      console.error('Error fetching subscription status:', err);
+      res.status(500).json({ error: 'Error fetching subscription status' });
   }
 };
 

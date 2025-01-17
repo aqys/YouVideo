@@ -88,49 +88,54 @@
 
     <script>
         async function loadSubscriptionStatus() {
-        try {
-            const urlParams = new URLSearchParams(window.location.search);
-            const channelId = urlParams.get('user');
-            
-            if (!channelId) {
-                console.log('No channel ID provided');
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                let channelId = urlParams.get('user');
+                
+                if (!channelId) {
+                    const currentUser = await getCurrentUser();
+                    if (currentUser) {
+                        channelId = currentUser.userName;
+                    } else {
+                        console.log('No channel ID provided and no current user found');
+                        document.querySelector('.subscription-info').style.display = 'none';
+                        return;
+                    }
+                }
+
+                console.log('Fetching subscription status for:', channelId);
+                const response = await fetch(`/api/subscription-status/${channelId}`);
+                
+                if (!response.ok) {
+                    console.error('Server response:', response.status, response.statusText);
+                    const text = await response.text();
+                    console.error('Response body:', text);
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Subscription data:', data);
+
+                const subscribeBtn = document.getElementById('subscribeBtn');
+                const subscriptionInfo = document.querySelector('.subscription-info');
+
+                const currentUser = await getCurrentUser();
+                if (currentUser && currentUser.userName === channelId) {
+                    subscribeBtn.style.display = 'none';
+                    return;
+                }
+
+                subscriptionInfo.style.display = 'flex';
+                subscribeBtn.textContent = data.isSubscribed ? 'Subscribed' : 'Subscribe';
+                subscribeBtn.classList.toggle('subscribed', data.isSubscribed);
+                
+                document.getElementById('subscriberCount').textContent = 
+                    `${data.subscriberCount} ${data.subscriberCount === 1 ? 'subscriber' : 'subscribers'}`;
+            } catch (error) {
+                console.error('Error loading subscription status:', error);
                 document.querySelector('.subscription-info').style.display = 'none';
-                return;
             }
-
-            console.log('Fetching subscription status for:', channelId);
-            const response = await fetch(`/api/subscription-status/${channelId}`);
-            
-            if (!response.ok) {
-                console.error('Server response:', response.status, response.statusText);
-                const text = await response.text();
-                console.error('Response body:', text);
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            console.log('Subscription data:', data);
-
-            const subscribeBtn = document.getElementById('subscribeBtn');
-            const subscriptionInfo = document.querySelector('.subscription-info');
-
-            const currentUser = await getCurrentUser();
-            if (currentUser && currentUser.userName === channelId) {
-                subscriptionInfo.style.display = 'none';
-                return;
-            }
-
-            subscriptionInfo.style.display = 'flex';
-            subscribeBtn.textContent = data.isSubscribed ? 'Subscribed' : 'Subscribe';
-            subscribeBtn.classList.toggle('subscribed', data.isSubscribed);
-            
-            document.getElementById('subscriberCount').textContent = 
-                `${data.subscriberCount} ${data.subscriberCount === 1 ? 'subscriber' : 'subscribers'}`;
-        } catch (error) {
-            console.error('Error loading subscription status:', error);
-            document.querySelector('.subscription-info').style.display = 'none';
         }
-    }
 
         async function getCurrentUser() {
             const response = await fetch('/check-login');
@@ -397,21 +402,25 @@
             try {
                 const response = await fetch('/api/profile/' + (profileUserName || ''));
                 const profileData = await response.json();
+                console.log('Fetched profile data:', profileData); // Log the fetched profile data
                 
                 document.getElementById('userName').textContent = profileData.userName;
                 
-                isOwnProfile = profileData.isOwnProfile;
+                const isOwnProfile = profileData.isOwnProfile;
                 console.log('Is own profile:', isOwnProfile);
                 
                 const editControls = document.getElementById('editControls');
                 const editNameBtn = document.getElementById('editNameBtn');
+                const subscribeBtn = document.getElementById('subscribeBtn');
                 
                 if (isOwnProfile) {
                     if (editControls) editControls.style.display = 'block';
                     if (editNameBtn) editNameBtn.style.display = 'block';
+                    if (subscribeBtn) subscribeBtn.style.display = 'none';
                 } else {
                     if (editControls) editControls.style.display = 'none';
                     if (editNameBtn) editNameBtn.style.display = 'none';
+                    if (subscribeBtn) subscribeBtn.style.display = 'block';
                 }
 
                 document.getElementById('profilePicture').src = 

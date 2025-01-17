@@ -262,10 +262,13 @@ app.get('/api/profile/:userName?', async (req, res) => {
       const isOwnProfile = req.session.user.userName === requestedUserName;
       console.log('Is own profile:', isOwnProfile);
 
-      res.json({
+      const profileData = {
           userName: result.recordset[0].userName,
           isOwnProfile: isOwnProfile
-      });
+      };
+      console.log('Profile data:', profileData); // Log the profile data
+
+      res.json(profileData);
   } catch (err) {
       console.error('Error fetching profile:', err);
       res.status(500).json({ error: 'Server error' });

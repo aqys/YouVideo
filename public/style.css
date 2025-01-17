@@ -318,7 +318,7 @@ form {
 .video-thumbnail:hover {
     border: 1px solid #ffffff88;
     cursor: pointer;
-    filter: brightness(0.75);
+    filter: brightness(0.55);
 }
 
 .error {
