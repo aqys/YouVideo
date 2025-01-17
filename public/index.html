@@ -13,6 +13,10 @@
             <a class="logo" href="/"><h1>YouVideo</h1></a>
         </div>
         <div class="nav-right">
+            <div id="progressContainer" style="display: none;">
+                <div id="loadingIndicator" class="loading" style="display: none;">Processing...</div>
+                <div id="progressBar"></div>
+            </div>
             <button id="upload" style="display: none;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cloud-arrow-up" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M7.646 5.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708z"/>
@@ -156,8 +160,49 @@
         document.getElementById('videoFile').addEventListener('change', function() {
             const videoName = prompt('Enter video name:');
             if (videoName) {
-                document.getElementById('videoName').value = videoName;
-                document.getElementById('uploadForm').submit();
+                const formData = new FormData();
+                formData.append('videoName', videoName);
+                formData.append('videoFile', document.getElementById('videoFile').files[0]);
+
+                const progressContainer = document.getElementById('progressContainer');
+                const progressBar = document.getElementById('progressBar');
+                const loadingIndicator = document.getElementById('loadingIndicator');
+                progressContainer.style.display = 'block';
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/upload', true);
+
+                xhr.upload.onprogress = function(event) {
+                    if (event.lengthComputable) {
+                        const percentComplete = (event.loaded / event.total) * 100;
+                        progressBar.style.width = percentComplete + '%';
+                        progressBar.innerHTML = Math.round(percentComplete) + '%';
+                    }
+                };
+
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        console.log('Upload successful');
+                        loadingIndicator.style.display = 'block'; // Show loading indicator
+                        window.location.reload(); // Reload the page after successful upload
+                    } else {
+                        console.error('Upload failed:', xhr.responseText);
+                        alert('Upload failed');
+                    }
+                    progressContainer.style.display = 'none';
+                    progressBar.style.width = '0%';
+                    progressBar.innerHTML = '';
+                };
+
+                xhr.onerror = function() {
+                    console.error('Upload error');
+                    alert('Upload failed');
+                    progressContainer.style.display = 'none';
+                    progressBar.style.width = '0%';
+                    progressBar.innerHTML = '';
+                };
+
+                xhr.send(formData);
             }
         });
 
@@ -165,15 +210,14 @@
             try {
                 const response = await fetch('/videos');
                 const text = await response.text();
-                console.log('Raw response:', text); // Add this line
+                console.log('Raw response:', text);
                 try {
                     const videos = JSON.parse(text);
-                    console.log('Parsed videos:', videos); // Add this line
-                    console.log('Received videos:', videos); // Debug log
+                    console.log('Parsed videos:', videos);
+                    console.log('Received videos:', videos);
                     const videoGrid = document.getElementById('videoGrid');
                     videoGrid.innerHTML = '';
                     
-                    // Randomize the videos array
                     const randomizedVideos = videos.sort(() => Math.random() - 0.5);
                     
                     randomizedVideos.forEach(video => {
@@ -198,8 +242,8 @@
                                         onerror="this.src='/default-profile.png'"
                                     />
                                     <div class="text-info">
-                                        <p class="video-name">${video.video_name}</p>
-                                        <p class="video-author" onclick="event.stopPropagation(); window.location.href='/profile.html?user=${video.author}'">${video.author || 'Unknown'}</p>
+                                        <p class="video-name-home">${video.video_name}</p>
+                                        <p class="video-author-home" onclick="event.stopPropagation(); window.location.href='/profile.html?user=${video.author}'">${video.author || 'Unknown'}</p>
                                     </div>
                                         <p class="video-length">${video.video_length}</p>
 
@@ -241,7 +285,6 @@
                 const uploadButton = document.getElementById('upload');
                 
                 if (data.loggedIn) {
-                    // User is logged in - show profile picture and dropdown
                     profileNav.innerHTML = `
                         <img 
                             src="/profile-picture/${data.user.userName}?${new Date().getTime()}" 
@@ -252,7 +295,6 @@
                     `;
                     if(uploadButton) uploadButton.style.display = 'flex';
                     
-                    // Update dropdown menu items for logged-in state
                     dropdownMenu.innerHTML = `
                         <div class="dropdown-item" id="yourChannel">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
@@ -270,7 +312,6 @@
                         </div>
                     `;
 
-                    // Add click event listener for profile picture to toggle dropdown
                     const profilePic = profileNav.querySelector('img');
                     if(profilePic) {
                         profilePic.addEventListener('click', (e) => {
@@ -279,14 +320,12 @@
                         });
                     }
 
-                    // Add click event listener to close dropdown when clicking outside
                     document.addEventListener('click', (e) => {
                         if (!dropdownMenu.contains(e.target) && !profileNav.contains(e.target)) {
                             dropdownMenu.classList.remove('show');
                         }
                     });
 
-                    // Add event listeners for dropdown items
                     const yourChannel = document.getElementById('yourChannel');
                     const signOut = document.getElementById('signOut');
 
@@ -312,7 +351,6 @@
                     }
 
                 } else {
-                    // User is not logged in - show login button
                     profileNav.innerHTML = `
                         <button id="loginButton2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
@@ -325,7 +363,6 @@
                     if(dropdownMenu) dropdownMenu.style.display = 'none';
                     if(uploadButton) uploadButton.style.display = 'none';
 
-                    // Add event listener to the login button
                     const loginButton2 = document.getElementById('loginButton2');
                     if(loginButton2) {
                         loginButton2.addEventListener('click', () => {
@@ -348,7 +385,6 @@
             const profileNav = document.getElementById('profileNav');
             const dropdownMenu = document.getElementById('dropdownMenu');
 
-            // Profile picture click listener
             const profilePic = profileNav.querySelector('img');
             if (profilePic) {
                 profilePic.addEventListener('click', (e) => {
@@ -357,14 +393,12 @@
                 });
             }
 
-            // Document click listener to close dropdown
             document.addEventListener('click', (e) => {
                 if (!dropdownMenu.contains(e.target) && !profileNav.contains(e.target)) {
                     dropdownMenu.classList.remove('show');
                 }
             });
 
-            // Dropdown item listeners
             const yourChannel = document.getElementById('yourChannel');
             const signOut = document.getElementById('signOut');
 
@@ -389,6 +423,23 @@
                 });
             }
         }
+
+        async function handleSignOut() {
+        try {
+            const response = await fetch('/logout', {
+                method: 'POST'
+            });
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                console.error('Error logging out');
+            }
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
+    }
+
+    document.getElementById('signOut').addEventListener('click', handleSignOut);
 
         // Modify your login form submit handler
         document.getElementById('loginForm').addEventListener('submit', async function(event) {

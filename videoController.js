@@ -5,29 +5,30 @@ const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs').promises;
 const os = require('os');
 const { v4: uuidv4 } = require('uuid');
-
 const NodeCache = require('node-cache');
-const videoCache = new NodeCache({ stdTTL: 600 }); // Cache for 10 minutes
+
+const caches = {
+  videoCache: new NodeCache({ stdTTL: 600 }),
+  thumbnailCache: new NodeCache({ stdTTL: 3600 }),
+  chunkCache: new NodeCache({ stdTTL: 300 })
+};
 
 dotenv.config();
 
-// Set the path to the ffmpeg executable
 ffmpeg.setFfmpegPath('C:/ffmpeg/bin/ffmpeg.exe');
 
-// Parse server and port from DB_SERVER
 const [dbServer, dbPort] = process.env.DB_SERVER.split(',');
 
-// Setup database connection
 const dbConfig = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   server: dbServer,
-  port: parseInt(dbPort, 10), // Convert port to integer
+  port: parseInt(dbPort, 10),
   database: process.env.DB_DATABASE,
   options: {
-    encrypt: true, // Use encryption
-    trustServerCertificate: true, // For local dev certs
-    connectionTimeout: 60000 // Increase timeout to 60 seconds
+    encrypt: true,
+    trustServerCertificate: true,
+    connectionTimeout: 60000
   }
 };
 
@@ -36,11 +37,11 @@ const poolPromise = mssql.connect(dbConfig)
     return pool;
   })
   .catch(err => {
-    return null; // Return null if connection fails
+    return null;
   });
 
 
-  function formatVideoLength(seconds) {
+function formatVideoLength(seconds) {
     const totalSeconds = Math.floor(Number(seconds) || 0);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -64,7 +65,6 @@ exports.getAllVideoBlobs = async (req, res) => {
             .query('SELECT id, video_name, author, video_length FROM videos ORDER BY id DESC');
     
         const videos = result.recordset.map(video => {
-            // **Insert the following line to format video_length**
             video.video_length = formatVideoLength(video.video_length);
             return video;
         });
@@ -98,8 +98,6 @@ exports.getAllVideoBlobs = async (req, res) => {
     }
 };
 
-
-
 exports.recordView = async (req, res) => {
   const videoId = req.params.id;
   const userId = req.session.user ? req.session.user.userName : req.ip;
@@ -107,7 +105,6 @@ exports.recordView = async (req, res) => {
   try {
       const pool = await poolPromise;
       
-      // Check if user viewed this video in the last 24 hours
       const recentView = await pool.request()
           .input('videoId', mssql.Int, videoId)
           .input('userId', mssql.VarChar, userId)
@@ -120,14 +117,12 @@ exports.recordView = async (req, res) => {
           `);
 
       if (recentView.recordset.length === 0) {
-          // Record new view
           await pool.request()
               .input('videoId', mssql.Int, videoId)
               .input('userId', mssql.VarChar, userId)
               .query('INSERT INTO video_views (video_id, user_id) VALUES (@videoId, @userId)');
       }
 
-      // Get total views
       const viewCount = await pool.request()
           .input('videoId', mssql.Int, videoId)
           .query(`
@@ -143,14 +138,42 @@ exports.recordView = async (req, res) => {
   }
 };
 
-// Fetch video blob data
-exports.getVideoBlob = async (req, res) => {
-  const videoId = req.params.id;
-  const range = req.headers.range;
+exports.getSubscriptionStatus = async (req, res) => {
+  const userName = req.params.userName;
+  const currentUser = req.session.user ? req.session.user.userName : null;
 
-  if (!range) {
-    console.error('Range header is missing');
-    return res.status(416).send('Range header required');
+  try {
+    const pool = await poolPromise;
+    if (!pool) {
+      throw new Error('Database connection failed');
+    }
+
+    const subscriptionResult = await pool.request()
+      .input('subscriber_id', mssql.NVarChar, currentUser)
+      .input('channel_id', mssql.NVarChar, userName)
+      .query('SELECT * FROM subscriptions WHERE subscriber_id = @subscriber_id AND channel_id = @channel_id');
+
+    const isSubscribed = subscriptionResult.recordset.length > 0;
+
+    const countResult = await pool.request()
+      .input('channel_id', mssql.NVarChar, userName)
+      .query('SELECT COUNT(*) AS subscriberCount FROM subscriptions WHERE channel_id = @channel_id');
+
+    const subscriberCount = countResult.recordset[0].subscriberCount;
+
+    res.json({ isSubscribed, subscriberCount });
+  } catch (err) {
+    console.error('Error fetching subscription status:', err);
+    res.status(500).json({ error: 'Error fetching subscription status' });
+  }
+};
+
+exports.subscribeToChannel = async (req, res) => {
+  const { channelId } = req.body;
+  const currentUser = req.session.user ? req.session.user.userName : null;
+
+  if (!currentUser) {
+    return res.status(401).json({ error: 'Not authenticated' });
   }
 
   try {
@@ -158,45 +181,108 @@ exports.getVideoBlob = async (req, res) => {
     if (!pool) {
       throw new Error('Database connection failed');
     }
-    const result = await pool.request()
-      .input('videoId', mssql.Int, videoId)
-      .query('SELECT video_blob FROM videos WHERE id = @videoId');
 
-    const videoBlob = result.recordset[0]?.video_blob;
+    const subscriptionResult = await pool.request()
+      .input('subscriber_id', mssql.NVarChar, currentUser)
+      .input('channel_id', mssql.NVarChar, channelId)
+      .query('SELECT * FROM subscriptions WHERE subscriber_id = @subscriber_id AND channel_id = @channel_id');
 
-    if (!videoBlob) {
-      console.error('Video not found');
-      return res.status(404).send('Video not found');
+    if (subscriptionResult.recordset.length > 0) {
+      await pool.request()
+        .input('subscriber_id', mssql.NVarChar, currentUser)
+        .input('channel_id', mssql.NVarChar, channelId)
+        .query('DELETE FROM subscriptions WHERE subscriber_id = @subscriber_id AND channel_id = @channel_id');
+
+      return res.json({ subscribed: false });
+    } else {
+      await pool.request()
+        .input('subscriber_id', mssql.NVarChar, currentUser)
+        .input('channel_id', mssql.NVarChar, channelId)
+        .query('INSERT INTO subscriptions (subscriber_id, channel_id, subscription_date) VALUES (@subscriber_id, @channel_id, GETDATE())');
+
+      return res.json({ subscribed: true });
     }
-
-    const videoSize = videoBlob.length;
-    const CHUNK_SIZE = 1000 ** 6; // 1MB
-    const start = Number(range.replace(/\D/g, ""));
-    const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
-
-    console.log(`Requested range: ${range}`);
-    console.log(`Video size: ${videoSize}`);
-    console.log(`Start: ${start}, End: ${end}`);
-
-    if (start >= videoSize) {
-      console.error('Range not satisfiable');
-      return res.status(416).send('Range not satisfiable');
-    }
-
-    const contentLength = end - start + 1;
-    const headers = {
-      "Content-Range": `bytes ${start}-${end}/${videoSize}`,
-      "Accept-Ranges": "bytes",
-      "Content-Length": contentLength,
-      "Content-Type": "video/mp4",
-    };
-
-    res.writeHead(206, headers);
-    res.end(videoBlob.slice(start, end + 1));
   } catch (err) {
-    console.error('Error fetching video blob:', err);
-    res.status(500).send('Error fetching video blob');
+    console.error('Error subscribing to channel:', err);
+    res.status(500).json({ error: 'Error subscribing to channel' });
   }
+};
+
+exports.getVideoBlob = async (req, res) => {
+    const videoId = parseInt(req.params.id, 10);
+    
+    try {
+        const pool = await poolPromise;
+        
+        const videoInfo = await pool.request()
+            .input('id', mssql.Int, videoId)
+            .query(`
+                SELECT 
+                    DATALENGTH(video_blob) as size,
+                    video_name
+                FROM videos WITH (NOLOCK)
+                WHERE id = @id
+            `);
+
+        if (!videoInfo.recordset[0]) {
+            return res.status(404).send('Video not found');
+        }
+
+        const videoSize = videoInfo.recordset[0].size;
+        const range = req.headers.range;
+
+        if (range) {
+            const parts = range.replace(/bytes=/, '').split('-');
+            const start = parseInt(parts[0], 10);
+            const end = parts[1] ? parseInt(parts[1], 10) : Math.min(start + 1024 * 1024, videoSize - 1);
+            const contentLength = end - start + 1;
+
+            const result = await pool.request()
+                .input('id', mssql.Int, videoId)
+                .input('start', mssql.Int, start + 1)
+                .input('length', mssql.Int, contentLength)
+                .query(`
+                    SELECT CAST(SUBSTRING(video_blob, @start, @length) AS VARBINARY(MAX)) as chunk 
+                    FROM videos WITH (NOLOCK)
+                    WHERE id = @id
+                `);
+
+            if (!result.recordset[0]?.chunk) {
+                return res.status(404).send('Video chunk not found');
+            }
+
+            const headers = {
+                'Content-Range': `bytes ${start}-${end}/${videoSize}`,
+                'Accept-Ranges': 'bytes',
+                'Content-Length': contentLength,
+                'Content-Type': 'video/mp4',
+                'Content-Disposition': `inline; filename="${videoInfo.recordset[0].video_name}.mp4"`,
+                'Cache-Control': 'public, max-age=3600'
+            };
+
+            res.writeHead(206, headers);
+            res.end(result.recordset[0].chunk);
+        } else {
+            const headers = {
+                'Content-Length': videoSize,
+                'Content-Type': 'video/mp4',
+                'Content-Disposition': `inline; filename="${videoInfo.recordset[0].video_name}.mp4"`,
+                'Accept-Ranges': 'bytes',
+                'Cache-Control': 'public, max-age=3600'
+            };
+
+            res.writeHead(200, headers);
+            
+            const result = await pool.request()
+                .input('id', mssql.Int, videoId)
+                .query('SELECT video_blob FROM videos WHERE id = @id');
+
+            res.end(result.recordset[0].video_blob);
+        }
+    } catch (err) {
+        console.error('Error streaming video:', err);
+        res.status(500).send('Error streaming video');
+    }
 };
 
 exports.getVideoDetails = async (req, res) => {
@@ -219,7 +305,7 @@ exports.getVideoDetails = async (req, res) => {
           return res.status(404).json({ error: 'Video not found' });
       }
 
-      console.log('Sending video details:', videoDetails); // Debug log
+      console.log('Sending video details:', videoDetails);
       res.json(videoDetails);
   } catch (err) {
       console.error('Error in getVideoDetails:', err);
@@ -227,7 +313,6 @@ exports.getVideoDetails = async (req, res) => {
   }
 };
 
-// Home page to display list of videos
 exports.homePage = async (req, res) => {
   try {
     const pool = await poolPromise;
@@ -243,74 +328,74 @@ exports.homePage = async (req, res) => {
 };
 
 exports.uploadVideo = async (req, res) => {
-    try {
-        const videoFile = req.file;
-        if (!videoFile) {
-            return res.status(400).send('No video file uploaded.');
-        }
+  if (!req.session.user) {
+      return res.status(401).send('You must be logged in to upload videos');
+  }
 
-        const pool = await poolPromise;
-        if (!pool) {
-            throw new Error('Database connection failed');
-        }
+  try {
+      const videoFile = req.file;
+      const videoName = req.body.videoName;
+      const author = req.session.user.userName;
 
-        const tempVideoPath = path.join(os.tmpdir(), `${uuidv4()}.mp4`);
-        const thumbnailPath = path.join(os.tmpdir(), `${uuidv4()}.png`);
-        await fs.writeFile(tempVideoPath, videoFile.buffer);
-        
-        // Get video duration
-        const durationInSeconds = await new Promise((resolve, reject) => {
-            console.log('Formatted duration:', formattedDuration);
-            ffmpeg.ffprobe(tempVideoPath, (err, metadata) => {
-                if (err) reject(err);
-                else {
-                    const duration = Math.floor(metadata.format.duration);
-                    console.log('Original duration:', metadata.format.duration);
-                    console.log('Stored duration (seconds):', duration);
-                    resolve(duration);
-                }
-            });
-        });
+      if (!videoFile || !videoName) {
+          return res.status(400).send('Missing file or video name');
+      }
 
-        // **Insert the following code to format the duration**
-        const formattedDuration = formatVideoLength(durationInSeconds);
-        console.log('Formatted duration:', formattedDuration);
-        // **End of inserted code**
+      const pool = await poolPromise;
+      if (!pool) {
+          throw new Error('Database connection failed');
+      }
 
-        // Save video details to the database
-        await pool.request()
-            .input('videoName', mssql.VarChar, req.body.videoName)
-            .input('author', mssql.VarChar, req.body.author)
-            .input('videoLength', mssql.VarChar, formattedDuration) // Use formattedDuration here
-            .input('videoData', mssql.VarBinary, videoFile.buffer)
-            .query('INSERT INTO videos (video_name, author, video_length, video_data) VALUES (@videoName, @author, @videoLength, @videoData)');
+      const tempVideoPath = path.join(os.tmpdir(), `${uuidv4()}.mp4`);
+      const thumbnailPath = path.join(os.tmpdir(), `${uuidv4()}.png`);
 
-        // Generate thumbnail (existing code continues...)
-        await new Promise((resolve, reject) => {
-            ffmpeg(tempVideoPath)
-                .screenshots({
-                    count: 1,
-                    timestamps: ['00:00:01'],
-                    folder: path.dirname(thumbnailPath),
-                    filename: path.basename(thumbnailPath),
-                    size: '1280x720'
-                })
-                .on('end', resolve)
-                .on('error', reject);
-        });
+      await fs.writeFile(tempVideoPath, videoFile.buffer);
 
-        // Clean up temporary files
-        await fs.unlink(tempVideoPath);
-        await fs.unlink(thumbnailPath);
+      const duration = await new Promise((resolve, reject) => {
+          ffmpeg.ffprobe(tempVideoPath, (err, metadata) => {
+              if (err) reject(err);
+              else resolve(metadata.format.duration);
+          });
+      });
 
-        res.status(200).send('Video uploaded successfully.');
-    } catch (err) {
-        console.error('Error uploading video:', err);
-        res.status(500).send('Error uploading video.');
-    }
+      await new Promise((resolve, reject) => {
+          ffmpeg(tempVideoPath)
+              .screenshots({
+                  count: 1,
+                  timestamps: ['00:00:01'],
+                  folder: path.dirname(thumbnailPath),
+                  filename: path.basename(thumbnailPath),
+                  size: '1280x720'
+              })
+              .on('end', resolve)
+              .on('error', reject);
+      });
+
+      const thumbnailBuffer = await fs.readFile(thumbnailPath);
+
+      await pool.request()
+          .input('videoName', mssql.NVarChar, videoName)
+          .input('videoBlob', mssql.VarBinary(mssql.MAX), videoFile.buffer)
+          .input('thumbnailBlob', mssql.VarBinary(mssql.MAX), thumbnailBuffer)
+          .input('author', mssql.NVarChar, author)
+          .input('videoLength', mssql.Float, duration)
+          .query(`
+              INSERT INTO videos (video_name, video_blob, thumbnail_blob, author, video_length) 
+              VALUES (@videoName, @videoBlob, @thumbnailBlob, @author, @videoLength)
+          `);
+
+      await Promise.all([
+          fs.unlink(tempVideoPath).catch(console.error),
+          fs.unlink(thumbnailPath).catch(console.error)
+      ]);
+
+      res.status(200).json({ message: 'Upload successful' });
+  } catch (err) {
+      console.error('Error in upload:', err);
+      res.status(500).json({ error: 'Upload failed: ' + err.message });
+  }
 };
 
-// Fetch comments for a video
 exports.getComments = async (req, res) => {
   const videoId = req.params.id;
   try {
@@ -328,7 +413,6 @@ exports.getComments = async (req, res) => {
   }
 };
 
-// Post a new comment
 exports.postComment = async (req, res) => {
   const { videoId, commentText } = req.body;
   const userName = req.session.user.userName;
@@ -353,34 +437,31 @@ exports.getThumbnail = async (req, res) => {
   const cacheKey = `thumbnail_${req.params.id}`;
   
   try {
-    // Check cache first
-    const cachedThumbnail = videoCache.get(cacheKey);
-    if (cachedThumbnail) {
-      res.setHeader('Content-Type', 'image/png');
-      return res.send(cachedThumbnail);
-    }
+      const cachedThumbnail = caches.thumbnailCache.get(cacheKey);
+      if (cachedThumbnail) {
+          res.setHeader('Content-Type', 'image/png');
+          return res.send(cachedThumbnail);
+      }
 
-    const pool = await poolPromise;
-    const result = await pool.request()
-      .input('id', mssql.Int, req.params.id)
-      .query('SELECT thumbnail_blob FROM videos WHERE id = @id');
+      const pool = await poolPromise;
+      const result = await pool.request()
+          .input('id', mssql.Int, req.params.id)
+          .query('SELECT thumbnail_blob FROM videos WHERE id = @id');
 
-    if (result.recordset[0]?.thumbnail_blob) {
-      // Cache the thumbnail
-      videoCache.set(cacheKey, result.recordset[0].thumbnail_blob);
-      
-      res.setHeader('Content-Type', 'image/png');
-      res.send(result.recordset[0].thumbnail_blob);
-    } else {
-      res.status(404).send('Thumbnail not found');
-    }
+      if (result.recordset[0]?.thumbnail_blob) {
+          caches.thumbnailCache.set(cacheKey, result.recordset[0].thumbnail_blob);
+          
+          res.setHeader('Content-Type', 'image/png');
+          res.send(result.recordset[0].thumbnail_blob);
+      } else {
+          res.status(404).send('Thumbnail not found');
+      }
   } catch (err) {
-    console.error('Error fetching thumbnail:', err);
-    res.status(500).send('Error fetching thumbnail');
+      console.error('Error fetching thumbnail:', err);
+      res.status(500).send('Error fetching thumbnail');
   }
 };
 
-// Watch video (streaming)
 exports.watchVideo = async (req, res) => {
   const videoId = req.params.id;
 

@@ -4,25 +4,19 @@ const mssql = require('mssql');
 const path = require('path');
 const dotenv = require('dotenv');
 const videoController = require('./videoController');
-const { formatVideoLength } = require('./videoController');
 const ffmpeg = require('fluent-ffmpeg');
-const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
-const { request } = require('http');
 
 dotenv.config();
 
-// Set the path to the ffmpeg executable
 ffmpeg.setFfmpegPath('C:/ffmpeg/bin/ffmpeg.exe');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Parse server and port from DB_SERVER
 const [dbServer, dbPort] = process.env.DB_SERVER.split(',');
 
-// Setup database connection
 const dbConfig = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -32,10 +26,11 @@ const dbConfig = {
   options: {
     encrypt: true,
     trustServerCertificate: true,
-    connectionTimeout:  60000, // Increase timeout to 60 seconds
-    requestTimeout: 1800000 // Increase request timeout to 30 minutes
+    connectionTimeout:  60000,
+    requestTimeout: 1800000
   }
 };
+
 
 console.log('Database configuration:', dbConfig);
 
@@ -46,21 +41,21 @@ const poolPromise = mssql.connect(dbConfig)
   })
   .catch(err => {
     console.error('Database connection failed:', err);
-    return null; // Return null if connection fails
+    return null;
   });
 
-// Middleware
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(express.json({ limit: '500mb' }));
+app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 app.use(session({
   secret: 'skibidiHawkTuahSecret',
   resave: false,
   saveUninitialized: true,
   cookie: {
-      secure: false, // set to true if using HTTPS
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      secure: false,
+      maxAge: 24 * 60 * 60 * 1000
   }
 }));
+
 /*
 app.get('/videos', async (req, res) => {
   try {
@@ -86,26 +81,40 @@ app.get('/videos', async (req, res) => {
 app.get('/videos', videoController.getAllVideoBlobs);
 
 
-// Set EJS as the view engine (you can use other templating engines)
 app.set('view engine', 'ejs');
-app.use(express.static(path.join(__dirname, 'public'))); // Serve static files like CSS, JS, images
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Body parser
-app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Set up multer for file uploads
-const storage = multer.memoryStorage(); // Store file in memory temporarily
-const upload = multer({ storage: storage });
+// Configure multer storage
+const storage = multer.memoryStorage();
 
-// Routes
+// Create multer instance
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 500 * 1024 * 1024, // 500MB limit
+        fieldSize: 500 * 1024 * 1024
+    }
+});
 app.get('/thumbnail/:id', videoController.getThumbnail);
 app.get('/', videoController.homePage);
-app.post('/upload', upload.single('videoFile'), videoController.uploadVideo);
 app.get('/videos', videoController.getAllVideoBlobs.bind(videoController));
 app.get('/video/blob/:id', videoController.getVideoBlob.bind(videoController));
+app.get('/api/subscription-status/:userName', videoController.getSubscriptionStatus);
+app.post('/api/subscribe', videoController.subscribeToChannel);
 app.get('/video/:id', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'video.html'));
+});
+
+app.post('/upload', upload.single('videoFile'), async (req, res) => {
+  try {
+      await videoController.uploadVideo(req, res);
+  } catch (error) {
+      console.error('Upload error:', error);
+      res.status(500).send(error.message);
+  }
 });
 
 app.get('/video/name/:id', async (req, res) => {
@@ -146,17 +155,15 @@ app.post('/login', async (req, res) => {
           const user = result.recordset[0];
           const passwordMatch = await bcrypt.compare(userPassword, user.userPassword);
           if (passwordMatch) {
-              // Set session data
               req.session.user = { 
                   userName: user.userName 
               };
-              // Save session explicitly
               req.session.save((err) => {
                   if (err) {
                       console.error('Session save error:', err);
                       return res.status(500).json({ error: 'Session error' });
                   }
-                  console.log('Session after login:', req.session); // Debug log
+                  console.log('Session after login:', req.session);
                   res.json({ userName: user.userName });
               });
           } else {
@@ -171,7 +178,6 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Register route
 app.post('/register', async (req, res) => {
   const { userName, userPassword, confirmPassword } = req.body;
   if (userPassword !== confirmPassword) {
@@ -227,23 +233,22 @@ app.get('/check-connection', async (req, res) => {
   }
 });
 
-// Add these routes after your existing routes
 app.get('/profile.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'profile.html'));
 });
 
 app.get('/api/profile/:userName?', async (req, res) => {
-  console.log('Session at profile request:', req.session); // Debug log
-  console.log('Session user:', req.session.user); // Debug log
+  console.log('Session at profile request:', req.session);
+  console.log('Session user:', req.session.user);
   
   try {
       if (!req.session.user) {
-          console.log('No session user found'); // Debug log
+          console.log('No session user found');
           return res.status(401).json({ error: 'Not authenticated' });
       }
 
       const requestedUserName = req.params.userName || req.session.user.userName;
-      console.log('Requested username:', requestedUserName); // Debug log
+      console.log('Requested username:', requestedUserName);
 
       const pool = await poolPromise;
       const result = await pool.request()
@@ -255,7 +260,7 @@ app.get('/api/profile/:userName?', async (req, res) => {
       }
 
       const isOwnProfile = req.session.user.userName === requestedUserName;
-      console.log('Is own profile:', isOwnProfile); // Debug log
+      console.log('Is own profile:', isOwnProfile);
 
       res.json({
           userName: result.recordset[0].userName,
@@ -300,7 +305,6 @@ app.get('/profile-picture/:userName', async (req, res) => {
       res.setHeader('Content-Type', 'image/jpeg');
       res.send(result.recordset[0].profile_picture);
     } else {
-      // Send default profile picture
       res.sendFile(path.join(__dirname, 'public', 'default-profile.png'));
     }
   } catch (err) {
@@ -309,7 +313,6 @@ app.get('/profile-picture/:userName', async (req, res) => {
   }
 });
 
-// Update profile picture route
 app.post('/api/update-profile-picture', upload.single('profilePicture'), async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ error: 'Not authenticated' });
@@ -329,7 +332,6 @@ app.post('/api/update-profile-picture', upload.single('profilePicture'), async (
   }
 });
 
-// Update username route
 app.post('/api/update-username', async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ error: 'Not authenticated' });
@@ -340,7 +342,6 @@ app.post('/api/update-username', async (req, res) => {
   try {
     const pool = await poolPromise;
     
-    // Check if new username is already taken
     const checkResult = await pool.request()
       .input('newUserName', mssql.NVarChar, newUserName)
       .query('SELECT userName FROM users WHERE userName = @newUserName');
@@ -349,7 +350,6 @@ app.post('/api/update-username', async (req, res) => {
       return res.status(400).json({ error: 'Username already taken' });
     }
 
-    // Update username in both users and videos tables
     await pool.request()
       .input('oldUserName', mssql.NVarChar, req.session.user.userName)
       .input('newUserName', mssql.NVarChar, newUserName)
@@ -368,7 +368,6 @@ app.post('/api/update-username', async (req, res) => {
   }
 });
 
-// Route to check login status
 app.get('/check-login', (req, res) => {
   if (req.session.user) {
     res.json({ loggedIn: true, user: req.session.user });
@@ -385,19 +384,17 @@ ffmpeg.getAvailableFormats((err, formats) => {
   }
 });
 
-// Logout route
 app.post('/logout', (req, res) => {
   req.session.destroy(err => {
-    if (err) {
-      return res.status(500).send('Error logging out');
-    }
-    res.send('Logged out');
+      if (err) {
+          return res.status(500).send('Error logging out');
+      }
+      res.send('Logged out');
   });
 });
 
-// Start the server
 const server = app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
 
-server.timeout = 30 * 60 * 1000; // Increase server timeout to 30 minutes
+server.timeout = 30 * 60 * 1000;

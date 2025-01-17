@@ -17,6 +17,13 @@
         </div>
     </nav>
     <div class="dropdown-menu" id="dropdownMenu">
+        <div class="dropdown-item" id="signIn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-in-right" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M6 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 0-1 0v2A1.5 1.5 0 0 0 6.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-8A1.5 1.5 0 0 0 5 3.5v2a.5.5 0 0 0 1 0z"/>
+                <path fill-rule="evenodd" d="M11.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H1.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+            </svg>
+            <span>Sign in</span>
+        </div>
         <div class="dropdown-item" id="yourChannel">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
                 <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
@@ -32,6 +39,24 @@
             <span>Sign out</span>
         </div>
     </div>
+    <section class="signin" id="loginForm" style="display: none;">
+        <div class="content">
+            <span class="close" id="closeLoginForm">&times;</span>
+            <h2>Login</h2>
+            <form class="form" action="/login" method="POST">
+                <div class="inputBox">
+                    <i>Username</i>
+                    <input type="text" name="userName" id="userName" placeholder="Username" required autocomplete="username">
+                </div>
+                <div class="inputBox">
+                    <i>Password</i>
+                    <input type="password" name="userPassword" id="userPassword" placeholder="Password" required autocomplete="current-password">
+                </div>
+                <input id="loginButton" type="submit" value="Login">
+            </form>
+            <button id="registerButton">Register</button>
+        </div>
+    </section>
     <div class="profile-container">
         <div class="profile-header">
             <div class="profile-picture-container">
@@ -62,52 +87,50 @@
     </div>
 
     <script>
-        // Subscription System
         async function loadSubscriptionStatus() {
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                const channelId = urlParams.get('user');
-                
-                if (!channelId) {
-                    console.log('No channel ID provided');
-                    document.querySelector('.subscription-info').style.display = 'none';
-                    return;
-                }
-
-                console.log('Fetching subscription status for:', channelId);
-                const response = await fetch(`/api/subscription-status/${channelId}`);
-                
-                if (!response.ok) {
-                    console.error('Server response:', response.status, response.statusText);
-                    const text = await response.text();
-                    console.error('Response body:', text);
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                console.log('Subscription data:', data);
-
-                const subscribeBtn = document.getElementById('subscribeBtn');
-                const subscriptionInfo = document.querySelector('.subscription-info');
-
-                // Don't show subscription info if it's the user's own profile
-                const currentUser = await getCurrentUser();
-                if (currentUser && currentUser.userName === channelId) {
-                    subscriptionInfo.style.display = 'none';
-                    return;
-                }
-
-                subscriptionInfo.style.display = 'flex';
-                subscribeBtn.textContent = data.isSubscribed ? 'Subscribed' : 'Subscribe';
-                subscribeBtn.classList.toggle('subscribed', data.isSubscribed);
-                
-                document.getElementById('subscriberCount').textContent = 
-                    `${data.subscriberCount} ${data.subscriberCount === 1 ? 'subscriber' : 'subscribers'}`;
-            } catch (error) {
-                console.error('Error loading subscription status:', error);
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const channelId = urlParams.get('user');
+            
+            if (!channelId) {
+                console.log('No channel ID provided');
                 document.querySelector('.subscription-info').style.display = 'none';
+                return;
             }
+
+            console.log('Fetching subscription status for:', channelId);
+            const response = await fetch(`/api/subscription-status/${channelId}`);
+            
+            if (!response.ok) {
+                console.error('Server response:', response.status, response.statusText);
+                const text = await response.text();
+                console.error('Response body:', text);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Subscription data:', data);
+
+            const subscribeBtn = document.getElementById('subscribeBtn');
+            const subscriptionInfo = document.querySelector('.subscription-info');
+
+            const currentUser = await getCurrentUser();
+            if (currentUser && currentUser.userName === channelId) {
+                subscriptionInfo.style.display = 'none';
+                return;
+            }
+
+            subscriptionInfo.style.display = 'flex';
+            subscribeBtn.textContent = data.isSubscribed ? 'Subscribed' : 'Subscribe';
+            subscribeBtn.classList.toggle('subscribed', data.isSubscribed);
+            
+            document.getElementById('subscriberCount').textContent = 
+                `${data.subscriberCount} ${data.subscriberCount === 1 ? 'subscriber' : 'subscribers'}`;
+        } catch (error) {
+            console.error('Error loading subscription status:', error);
+            document.querySelector('.subscription-info').style.display = 'none';
         }
+    }
 
         async function getCurrentUser() {
             const response = await fetch('/check-login');
@@ -120,45 +143,43 @@
             return currentUser && currentUser.userName === channelId;
         }
 
-        // Add click event listener for subscribe button
         document.getElementById('subscribeBtn').addEventListener('click', async () => {
-            try {
-                const subscribeBtn = document.getElementById('subscribeBtn');
-                subscribeBtn.disabled = true; // Prevent double-clicks
-                
-                const urlParams = new URLSearchParams(window.location.search);
-                const channelId = urlParams.get('user');
-                
-                if (!channelId) {
-                    throw new Error('No channel ID provided');
-                }
-
-                const response = await fetch('/api/subscribe', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ channelId })
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Failed to subscribe');
-                }
-
-                const data = await response.json();
-                subscribeBtn.textContent = data.subscribed ? 'Subscribed' : 'Subscribe';
-                subscribeBtn.classList.toggle('subscribed', data.subscribed);
-                
-                // Refresh subscriber count
-                await loadSubscriptionStatus();
-            } catch (error) {
-                console.error('Error:', error);
-                alert(error.message || 'An error occurred while processing your request');
-            } finally {
-                subscribeBtn.disabled = false;
+        try {
+            const subscribeBtn = document.getElementById('subscribeBtn');
+            subscribeBtn.disabled = true;
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const channelId = urlParams.get('user');
+            
+            if (!channelId) {
+                throw new Error('No channel ID provided');
             }
-        });
+
+            const response = await fetch('/api/subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ channelId })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to subscribe');
+            }
+
+            const data = await response.json();
+            subscribeBtn.textContent = data.subscribed ? 'Subscribed' : 'Subscribe';
+            subscribeBtn.classList.toggle('subscribed', data.subscribed);
+            
+            await loadSubscriptionStatus();
+        } catch (error) {
+            console.error('Error:', error);
+            alert(error.message || 'An error occurred while processing your request');
+        } finally {
+            subscribeBtn.disabled = false;
+        }
+    });
 
 
         async function checkLoginStatus() {
@@ -170,7 +191,6 @@
                 const uploadButton = document.getElementById('upload');
                 
                 if (data.loggedIn) {
-                    // User is logged in - show profile picture and dropdown
                     profileNav.innerHTML = `
                         <img 
                             src="/profile-picture/${data.user.userName}?${new Date().getTime()}" 
@@ -181,7 +201,6 @@
                     `;
                     if(uploadButton) uploadButton.style.display = 'flex';
                     
-                    // Update dropdown menu items for logged-in state
                     dropdownMenu.innerHTML = `
                         <div class="dropdown-item" id="yourChannel">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
@@ -199,7 +218,6 @@
                         </div>
                     `;
 
-                    // Add click event listener for profile picture to toggle dropdown
                     const profilePic = profileNav.querySelector('img');
                     if(profilePic) {
                         profilePic.addEventListener('click', (e) => {
@@ -208,14 +226,12 @@
                         });
                     }
 
-                    // Add click event listener to close dropdown when clicking outside
                     document.addEventListener('click', (e) => {
                         if (!dropdownMenu.contains(e.target) && !profileNav.contains(e.target)) {
                             dropdownMenu.classList.remove('show');
                         }
                     });
 
-                    // Add event listeners for dropdown items
                     const yourChannel = document.getElementById('yourChannel');
                     const signOut = document.getElementById('signOut');
 
@@ -241,7 +257,6 @@
                     }
 
                 } else {
-                    // User is not logged in - show login button
                     profileNav.innerHTML = `
                         <button id="loginButton2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
@@ -254,7 +269,6 @@
                     if(dropdownMenu) dropdownMenu.style.display = 'none';
                     if(uploadButton) uploadButton.style.display = 'none';
 
-                    // Add event listener to the login button
                     const loginButton2 = document.getElementById('loginButton2');
                     if(loginButton2) {
                         loginButton2.addEventListener('click', () => {
@@ -306,7 +320,66 @@
             }
         }
 
-        // Helper function to handle clicks outside the dropdown
+        document.getElementById('signIn').addEventListener('click', () => {
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.style.display = 'flex';
+                requestAnimationFrame(() => {
+                    loginForm.classList.add('active');
+                });
+            }
+        });
+
+        document.getElementById('closeLoginForm').addEventListener('click', function() {
+            const loginForm = document.getElementById('loginForm');
+            loginForm.classList.remove('active');
+            setTimeout(() => {
+                loginForm.style.display = 'none';
+            }, 200);
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const userName = document.getElementById('userName').value;
+            const userPassword = document.getElementById('userPassword').value;
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ userName, userPassword })
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    const error = await response.json();
+                    alert(error.error);
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+            }
+        });
+
+        async function handleSignOut() {
+        try {
+            const response = await fetch('/logout', {
+                method: 'POST'
+            });
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                console.error('Error logging out');
+            }
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
+    }
+
+    document.getElementById('signOut').addEventListener('click', handleSignOut);
+
         function handleOutsideClick(e) {
             const profileNav = document.getElementById('profileNav');
             const dropdownMenu = document.getElementById('dropdownMenu');
@@ -322,17 +395,14 @@
             const profileUserName = urlParams.get('user');
             
             try {
-                // If no specific user is provided in URL, use the logged-in user's profile
                 const response = await fetch('/api/profile/' + (profileUserName || ''));
                 const profileData = await response.json();
                 
                 document.getElementById('userName').textContent = profileData.userName;
                 
-                // Show edit controls if it's the user's own profile
                 isOwnProfile = profileData.isOwnProfile;
-                console.log('Is own profile:', isOwnProfile); // Debug log
+                console.log('Is own profile:', isOwnProfile);
                 
-                // Make sure these elements exist and are properly shown/hidden
                 const editControls = document.getElementById('editControls');
                 const editNameBtn = document.getElementById('editNameBtn');
                 
@@ -344,17 +414,14 @@
                     if (editNameBtn) editNameBtn.style.display = 'none';
                 }
 
-                // Load profile picture
                 document.getElementById('profilePicture').src = 
                     `/profile-picture/${profileData.userName}?${new Date().getTime()}`;
 
-                // Load user's videos
                 const videosResponse = await fetch(`/api/user-videos/${profileData.userName}`);
                 const videos = await videosResponse.json();
                 displayVideos(videos);
             } catch (error) {
                 console.error('Error loading profile:', error);
-                // Show error message to user
                 document.querySelector('.profile-container').innerHTML = `
                     <div class="error-message">
                         Failed to load profile. Please try again later.
@@ -391,7 +458,6 @@
             });
         }
 
-        // Profile picture upload handling
         document.getElementById('changeProfilePicture').addEventListener('click', () => {
             document.getElementById('profilePictureInput').click();
         });
@@ -410,7 +476,6 @@
                 });
 
                 if (response.ok) {
-                    // Reload profile picture with cache-busting query parameter
                     document.getElementById('profilePicture').src = 
                         `/profile-picture/${document.getElementById('userName').textContent}?${new Date().getTime()}`;
                 }
@@ -419,7 +484,6 @@
             }
         });
 
-        // Username edit handling
         document.getElementById('editNameBtn').addEventListener('click', () => {
             document.getElementById('editNameForm').style.display = 'block';
             document.getElementById('newUserName').value = document.getElementById('userName').textContent;

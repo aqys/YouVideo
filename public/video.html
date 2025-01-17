@@ -8,15 +8,29 @@
     <title>YouVideo</title>
 </head>
 <body>
-    <nav class="navbar">
+    <nav class="navbar2">
         <div class="nav-left">
             <a class="logo" href="/"><h1>YouVideo</h1></a>
         </div>
         <div class="nav-right">
             <div class="profile-nav" id="profileNav"></div>
+            <button id="loginButton2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                </svg>
+                Sign in
+            </button>
         </div>
     </nav>
     <div class="dropdown-menu" id="dropdownMenu">
+        <div class="dropdown-item" id="signIn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-in-right" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M6 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 0-1 0v2A1.5 1.5 0 0 0 6.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-8A1.5 1.5 0 0 0 5 3.5v2a.5.5 0 0 0 1 0z"/>
+                <path fill-rule="evenodd" d="M11.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H1.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+            </svg>
+            <span>Sign in</span>
+        </div>
         <div class="dropdown-item" id="yourChannel">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
                 <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
@@ -32,9 +46,27 @@
             <span>Sign out</span>
         </div>
     </div>
+    <section class="signin" id="loginForm" style="display: none;">
+        <div class="content">
+            <span class="close" id="closeLoginForm">&times;</span>
+            <h2>Login</h2>
+            <form class="form" action="/login" method="POST">
+                <div class="inputBox">
+                    <i>Username</i>
+                    <input type="text" name="userName" id="userName" placeholder="Username" required autocomplete="username">
+                </div>
+                <div class="inputBox">
+                    <i>Password</i>
+                    <input type="password" name="userPassword" id="userPassword" placeholder="Password" required autocomplete="current-password">
+                </div>
+                <input id="loginButton" type="submit" value="Login">
+            </form>
+            <button id="registerButton">Register</button>
+        </div>
+    </section>
     <div class="video-container">
         <div id="videoPlaceholder" style="width: 1280px; height: 720px; background-color: gray; display: none;"></div>
-        <video id="videoPlayer" controls style="display: none;"></video>
+        <video id="videoPlayer" controls style="display: none;" poster=""></video>
         
         <!-- Video Information Container -->
         <div class="video-info-container">
@@ -45,29 +77,30 @@
                     <a id="authorName" class="video-author"></a>
                     <p id="uploadDate" class="video-date"></p>
                 </div>
-                <div class="video-stats">
-                    <span id="viewCount">0 views</span>
+                <div class="video-interactions">
+                    <div class="interaction-container">
+                        <button id="likeBtn" class="interaction-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
+                            </svg>
+                            <span id="likeCount">0</span>
+                        </button>
+                        <button id="dislikeBtn" class="interaction-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/>
+                            </svg>
+                            <span id="dislikeCount">0</span>
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="video-interactions">
-                <button id="likeBtn" class="interaction-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
-                    </svg>
-                    <span id="likeCount">0</span>
-                </button>
-                <button id="dislikeBtn" class="interaction-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/>
-                    </svg>
-                    <span id="dislikeCount">0</span>
-                </button>
+            <div class="video-stats">
+                <span id="viewCount">0 views</span>
             </div>
         </div>
     </div>
 
     <script>
-        // Like/Dislike System
         async function loadVideoInteractions() {
             try {
                 const videoId = new URLSearchParams(window.location.search).get('id');
@@ -87,7 +120,6 @@
             }
         }
 
-        // Add event listeners for like/dislike buttons
         document.getElementById('likeBtn').addEventListener('click', async () => {
             try {
                 const videoId = new URLSearchParams(window.location.search).get('id');
@@ -144,7 +176,6 @@
             }
         });
 
-        // View Count System
         async function recordView() {
             try {
                 const videoId = new URLSearchParams(window.location.search).get('id');
@@ -167,17 +198,34 @@
                 const dropdownMenu = document.getElementById('dropdownMenu');
                 
                 if (data.loggedIn) {
-                    // User is logged in
                     profileNav.innerHTML = `
-                        <img 
-                            src="/profile-picture/${data.user.userName}?${new Date().getTime()}" 
-                            alt="Profile" 
-                            onerror="this.src='/default-profile.png'"
-                            class="profile-picture"
-                        />
-                    `;
+                <img 
+                    src="/profile-picture/${data.user.userName}?${new Date().getTime()}" 
+                    alt="Profile" 
+                    onerror="this.src='/default-profile.png'"
+                    class="profile-picture"
+                />
+            `;
+            profileNav.style.display = 'block';
+            loginButton2.style.display = 'none';
 
-                    // Update dropdown menu items for logged-in state
+            dropdownMenu.innerHTML = `
+                <div class="dropdown-item" id="yourChannel">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                        <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                        <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                    </svg>
+                    <span>Your channel</span>
+                </div>
+                <div class="dropdown-item" id="signOut">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/>
+                        <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+                    </svg>
+                    <span>Sign out</span>
+                </div>
+            `;
+
                     dropdownMenu.innerHTML = `
                         <div class="dropdown-item" id="yourChannel">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
@@ -195,16 +243,19 @@
                         </div>
                     `;
                 } else {
-                    // User is not logged in
-                    profileNav.innerHTML = `
-                        <img 
-                            src="/default-profile.png" 
-                            alt="Profile" 
-                            class="profile-picture"
-                        />
+                    profileNav.style.display = 'none';
+                    loginButton2.style.display = 'flex';
+
+                    dropdownMenu.innerHTML = `
+                        <div class="dropdown-item" id="signIn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-in-right" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M6 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 0-1 0v2A1.5 1.5 0 0 0 6.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-8A1.5 1.5 0 0 0 5 3.5v2a.5.5 0 0 0 1 0z"/>
+                                <path fill-rule="evenodd" d="M11.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H1.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+                            </svg>
+                            <span>Sign in</span>
+                        </div>
                     `;
 
-                    // Update dropdown menu items for logged-out state
                     dropdownMenu.innerHTML = `
                         <div class="dropdown-item" id="signIn">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-in-right" viewBox="0 0 16 16">
@@ -216,12 +267,10 @@
                     `;
                 }
                 
-                // Remove any existing listeners
                 const oldProfileNav = document.getElementById('profileNav');
                 const newProfileNav = oldProfileNav.cloneNode(true);
                 oldProfileNav.parentNode.replaceChild(newProfileNav, oldProfileNav);
                 
-                // Add click listener to new profile nav
                 newProfileNav.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
@@ -229,7 +278,6 @@
                     dropdownMenu.classList.toggle('show');
                 });
 
-                // Add click listener to document to close dropdown
                 document.addEventListener('click', function(e) {
                     if (!dropdownMenu.contains(e.target) && !newProfileNav.contains(e.target)) {
                         dropdownMenu.classList.remove('show');
@@ -242,11 +290,70 @@
             }
         }
 
-        // Handle dropdown functionality
         function attachDropdownListeners() {
     const yourChannel = document.getElementById('yourChannel');
     const signOut = document.getElementById('signOut');
     const signIn = document.getElementById('signIn');
+
+    document.getElementById('loginButton2').addEventListener('click', () => {
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.style.display = 'flex';
+        requestAnimationFrame(() => {
+            loginForm.classList.add('active');
+        });
+    }
+});
+
+document.getElementById('closeLoginForm').addEventListener('click', function() {
+    const loginForm = document.getElementById('loginForm');
+    loginForm.classList.remove('active');
+    setTimeout(() => {
+        loginForm.style.display = 'none';
+    }, 200);
+});
+
+async function handleSignOut() {
+        try {
+            const response = await fetch('/logout', {
+                method: 'POST'
+            });
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                console.error('Error logging out');
+            }
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
+    }
+
+    document.getElementById('signOut').addEventListener('click', handleSignOut);
+
+document.getElementById('loginForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const userName = document.getElementById('userName').value;
+    const userPassword = document.getElementById('userPassword').value;
+
+    try {
+        const response = await fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ userName, userPassword })
+        });
+
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            const error = await response.json();
+            alert(error.error);
+        }
+    } catch (error) {
+        console.error('Error during login:', error);
+    }
+});
 
     if (yourChannel) {
         yourChannel.addEventListener('click', () => {
@@ -276,7 +383,6 @@
     }
 }
 
-        // Helper function to handle clicks outside the dropdown
         function handleOutsideClick(e) {
             const profileNav = document.getElementById('profileNav');
             const dropdownMenu = document.getElementById('dropdownMenu');
@@ -287,28 +393,43 @@
 
         async function fetchVideoBlob(videoId) {
             try {
-                document.getElementById('videoPlaceholder').style.display = 'block';
-                const response = await fetch(`/video/blob/${videoId}`, {
-                    headers: {
-                        'Range': 'bytes=0-'
-                    }
+                const videoPlayer = document.getElementById('videoPlayer');
+                const placeholder = document.getElementById('videoPlaceholder');
+                
+                // Show placeholder initially
+                placeholder.style.display = 'block';
+                videoPlayer.style.display = 'none';
+                
+                // Set video source
+                videoPlayer.src = `/video/blob/${videoId}`;
+                
+                // Add event listeners
+                videoPlayer.addEventListener('canplay', () => {
+                    placeholder.style.display = 'none';
+                    videoPlayer.style.display = 'block';
                 });
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const videoBlob = await response.blob();
-                const videoUrl = URL.createObjectURL(new Blob([videoBlob], { type: 'video/mp4' }));
-                return videoUrl;
+
+                videoPlayer.addEventListener('waiting', () => {
+                    placeholder.style.display = 'block';
+                    videoPlayer.style.display = 'none';
+                });
+
+                videoPlayer.addEventListener('error', (e) => {
+                    console.error('Video loading error:', e);
+                    placeholder.style.display = 'block';
+                    videoPlayer.style.display = 'none';
+                });
+
+                return videoPlayer.src;
             } catch (error) {
                 console.error('Error fetching video blob:', error);
-            } finally {
-                document.getElementById('videoPlaceholder').style.display = 'none';
+                document.getElementById('videoPlaceholder').style.display = 'block';
+                throw error;
             }
         }
 
         async function fetchVideoDetails(videoId) {
             try {
-                // First get basic video details (matching index.html's approach)
                 const videoResponse = await fetch('/videos');
                 const videos = await videoResponse.json();
                 const videoDetails = videos.find(video => video.id === parseInt(videoId));
@@ -320,54 +441,200 @@
                 return {
                     video_name: videoDetails.video_name,
                     author: videoDetails.author,
-                    video_date: videoDetails.upload_date // Note: This might be undefined if not included in /videos endpoint
+                    video_date: videoDetails.upload_date
                 };
             } catch (error) {
                 console.error('Error fetching video details:', error);
             }
         }
 
-        window.onload = async function() {
-            await checkLoginStatus();
-            const videoDetails = await loadVideoDetails();
-            await loadVideoInteractions();
-            await recordView();
-        };
-
-        window.onload = async function() {
-            await checkLoginStatus(); // Add this line
+        async function loadVideo() {
             const urlParams = new URLSearchParams(window.location.search);
             const videoId = urlParams.get('id');
             
-            if (videoId) {
-                const videoDetails = await fetchVideoDetails(videoId);
-                if (videoDetails) {
-                    // Update page title
-                    document.title = `${videoDetails.video_name} - YouVideo`;
-                    
-                    // Update video details
-                    document.getElementById('videoName').textContent = videoDetails.video_name;
-                    document.getElementById('authorName').textContent = videoDetails.author;
-                    document.getElementById('authorName').href = `/profile.html?user=${videoDetails.author}`;
-                    document.getElementById('authorProfilePic').src = `/profile-picture/${videoDetails.author}`;
-                    
-                    // Only show date if available
-                    if (videoDetails.video_date) {
-                        document.getElementById('uploadDate').textContent = new Date(videoDetails.video_date).toLocaleDateString();
-                    } else {
-                        document.getElementById('uploadDate').style.display = 'none';
-                    }
+            if (!videoId || isNaN(parseInt(videoId, 10))) {
+                console.error('Invalid or missing Video ID in URL');
+                return;
+            }
+
+            const videoPlayer = document.getElementById('videoPlayer');
+            const placeholder = document.getElementById('videoPlaceholder');
+            
+            // Configure video player
+            videoPlayer.controls = true;
+            videoPlayer.autoplay = false;
+            videoPlayer.preload = "auto";
+
+            // Set up event listeners
+            const eventListeners = {
+                loadstart: () => {
+                    console.log('Video loading started');
+                    placeholder.style.display = 'block';
+                    videoPlayer.style.display = 'none';
+                },
+                loadedmetadata: () => {
+                    console.log('Video metadata loaded');
+                },
+                canplay: () => {
+                    console.log('Video can start playing');
+                    placeholder.style.display = 'none';
+                    videoPlayer.style.display = 'block';
+                },
+                playing: () => {
+                    console.log('Video is playing');
+                    placeholder.style.display = 'none';
+                    videoPlayer.style.display = 'block';
+                },
+                waiting: () => {
+                    console.log('Video is buffering');
+                    placeholder.style.display = 'block';
+                    videoPlayer.style.display = 'none';
+                },
+                error: (e) => {
+                    console.error('Video error:', videoPlayer.error);
+                    placeholder.style.display = 'block';
+                    videoPlayer.style.display = 'none';
+                }
+            };
+
+            // Remove any existing listeners first
+            Object.keys(eventListeners).forEach(event => {
+                videoPlayer.removeEventListener(event, eventListeners[event]);
+            });
+
+            // Add new listeners
+            Object.entries(eventListeners).forEach(([event, handler]) => {
+                videoPlayer.addEventListener(event, handler);
+            });
+
+            try {
+                // Show loading state
+                placeholder.style.display = 'block';
+                videoPlayer.style.display = 'none';
+
+                // Set video source with timestamp to prevent caching
+                const timestamp = new Date().getTime();
+                videoPlayer.src = `/video/blob/${videoId}?t=${timestamp}`;
+
+                // Load the video
+                await videoPlayer.load();
+
+                console.log('Video source set:', videoPlayer.src);
+
+            } catch (error) {
+                console.error('Error loading video:', error);
+                placeholder.style.display = 'block';
+                videoPlayer.style.display = 'none';
+            }
+        }
+
+        async function initializePage() {
+            await checkLoginStatus();
+            await loadVideoDetails();
+            await loadVideoInteractions();
+            await recordView();
+            await loadVideo();
+        }
+
+        async function loadSubscriptionStatus() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const channelId = urlParams.get('user');
+                
+                if (!channelId) {
+                console.log('No channel ID provided');
+                document.querySelector('.subscription-info').style.display = 'none';
+                return;
                 }
 
-                // Load video
-                const videoUrl = await fetchVideoBlob(videoId);
-                const videoPlayer = document.getElementById('videoPlayer');
-                videoPlayer.src = videoUrl;
-                videoPlayer.style.display = 'block';
-            } else {
-                console.error('Video ID not found in URL');
+                console.log('Fetching subscription status for:', channelId);
+                const response = await fetch(`/api/subscription-status/${channelId}`);
+                
+                if (!response.ok) {
+                console.error('Server response:', response.status, response.statusText);
+                const text = await response.text();
+                console.error('Response body:', text);
+                throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Subscription data:', data);
+
+                const subscribeBtn = document.getElementById('subscribeBtn');
+                const subscriptionInfo = document.querySelector('.subscription-info');
+
+                const currentUser = await getCurrentUser();
+                if (currentUser && currentUser.userName === channelId) {
+                subscriptionInfo.style.display = 'none';
+                return;
+                }
+
+                subscriptionInfo.style.display = 'flex';
+                subscribeBtn.textContent = data.isSubscribed ? 'Subscribed' : 'Subscribe';
+                subscribeBtn.classList.toggle('subscribed', data.isSubscribed);
+                
+                document.getElementById('subscriberCount').textContent = 
+                    `${data.subscriberCount} ${data.subscriberCount === 1 ? 'subscriber' : 'subscribers'}`;
+            } catch (error) {
+                console.error('Error loading subscription status:', error);
+                document.querySelector('.subscription-info').style.display = 'none';
+            }
+        }
+
+        function checkVideoPlayback(videoElement) {
+            const videoCheck = document.createElement('video');
+            const formats = {
+                mp4: 'video/mp4',
+                webm: 'video/webm',
+                ogg: 'video/ogg'
+            };
+            
+            const supported = Object.entries(formats).filter(([format, mime]) => {
+                return videoCheck.canPlayType(mime) !== "";
+            });
+            
+            console.log('Supported video formats:', supported);
+            return supported.length > 0;
+        }
+
+        window.onload = async function() {
+            try {
+                await checkLoginStatus();
+                const urlParams = new URLSearchParams(window.location.search);
+                const videoId = urlParams.get('id');
+                
+                if (videoId) {
+                    // Load video details first
+                    const videoDetails = await fetchVideoDetails(videoId);
+                    if (videoDetails) {
+                        document.title = `${videoDetails.video_name} - YouVideo`;
+                        document.getElementById('videoName').textContent = videoDetails.video_name;
+                        document.getElementById('authorName').textContent = videoDetails.author;
+                        document.getElementById('authorName').href = `/profile.html?user=${videoDetails.author}`;
+                        document.getElementById('authorProfilePic').src = `/profile-picture/${videoDetails.author}`;
+                        
+                        if (videoDetails.video_date) {
+                            document.getElementById('uploadDate').textContent = 
+                                new Date(videoDetails.video_date).toLocaleDateString();
+                        } else {
+                            document.getElementById('uploadDate').style.display = 'none';
+                        }
+                    }
+
+                    // Load the video
+                    await loadVideo();
+                    
+                    // Load additional information
+                    await loadVideoInteractions();
+                    await recordView();
+                } else {
+                    console.error('Video ID not found in URL');
+                }
+            } catch (error) {
+                console.error('Error during page initialization:', error);
             }
         };
+
     </script>
 </body>
 </html>

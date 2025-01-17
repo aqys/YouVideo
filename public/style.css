@@ -42,7 +42,6 @@ form {
     transition: opacity 0.15s ease, visibility 0.15s ease;
 }
 
-
 #loginForm.active, #registerForm.active {
     opacity: 1;
     visibility: visible;
@@ -154,6 +153,7 @@ form {
     border: 1px solid #3131313b;
     transition: border 0.3s, background-color 0.15s;
     cursor: pointer;
+    margin-bottom: 5vh;
 }
 
 .video-item:active {
@@ -175,17 +175,19 @@ form {
     margin-top: 0;
 }
 
+.video-stats {
+    margin-top: 0.5rem;
+}
 
 .author-info {
     display: flex;
     gap: 10px;
     margin-top: 5px;
-    padding: 4px;
 }
 
 .author-profile-pic {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid #ffffff33;
@@ -201,7 +203,7 @@ form {
 .video-name {
     color: #F1F1F1;
     font-weight: 500;
-    font-size: 1rem;
+    font-size: 1.45rem;
     margin: 0;
     line-height: 1.2;
     text-overflow: ellipsis;
@@ -209,7 +211,7 @@ form {
 
 .video-author {
     color: #818181;
-    font-size: 0.9rem;
+    font-size: 1.25rem;
     font-weight: 500;
     margin: 0;
     cursor: pointer;
@@ -229,10 +231,15 @@ form {
 }
 
 .video-length {
-    margin-top: -40.5px;
-    margin-left: 10px;
+    margin-top: -45px;
     text-align: right;
+    padding-right: 10px;
     width: 100%;
+    height: fit-content;
+}
+
+.video-length:hover {
+    display: none;
 }
 
 
@@ -242,12 +249,28 @@ form {
     padding: 20px;
 }
 
+.video-name-home {
+    font-size: 1.15rem;
+    color: #F1F1F1;
+    font-weight: 500;
+    margin: 0;
+    margin-top: 0.15vw;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+}
+
+.video-author-home {
+    font-size: 0.9rem;
+    color: #818181;
+    font-weight: 500;
+    margin: 0;
+    cursor: pointer;
+    transition: color 0.2s;
+    line-height: 1.2;
+}
+
 .video-info-container {
     margin-top: 20px;
-    padding: 20px;
-    background: #1a1a1a;
-    border-radius: 12px;
-    border: 1px solid #333;
 }
 
 
@@ -261,7 +284,6 @@ form {
     text-decoration: none;
     color: #fff;
     font-weight: 500;
-    font-size: 1.1rem;
 }
 
 .video-info-container .video-author:hover {
@@ -309,8 +331,10 @@ form {
     width: 1280px;
     height: 720px;
     left: 0px;
-    top: 0px;
+    margin-top: -18px;
     border-radius: 12px;
+    display: none;
+    filter: drop-shadow(0px 0px 100px #ffffff59);
 }
 
 @keyframes blink {
@@ -320,6 +344,25 @@ form {
     50% {
         background-color: rgb(67, 67, 67);
     }
+}
+
+.loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.loading::after {
+    content: 'Uploading...';
+    color: white;
+    font-size: 20px;
 }
 
 .logo {
@@ -600,14 +643,26 @@ form {
     left: 0;
     right: 0;
     height: 60px;
-    background-color: rgba(0, 0, 0, 0.95);
+    background-color: rgba(0, 0, 0, 1);
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
     z-index: 1000;
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid #ffffff1a;
+}
+
+.navbar2 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background-color: rgba(0, 0, 0, 0);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 1000;
 }
 
 .nav-left {
@@ -705,8 +760,14 @@ form {
 
 .video-interactions {
     display: flex;
-    gap: 20px;
-    margin-top: 20px;
+    margin-left: 48vw;
+}
+
+.interaction-container {
+    display: flex;
+    background: #272727;
+    border-radius: 20px;
+    overflow: hidden;
 }
 
 .interaction-btn {
@@ -714,9 +775,8 @@ form {
     align-items: center;
     gap: 8px;
     padding: 10px 20px;
-    background: #272727;
+    background: none;
     border: none;
-    border-radius: 20px;
     color: white;
     cursor: pointer;
     transition: background-color 0.2s;
@@ -797,4 +857,22 @@ form {
     padding: 40px;
     color: #888;
     font-size: 1.2em;
+}
+
+#progressContainer {
+    width: 8vw;
+    background-color: #1f1f1f;
+    border: 1px solid #474747;
+    border-radius: 8px;
+    margin-left: -19vw;
+    margin-top: 0.25vw;
+}
+
+#progressBar {
+    width: 0%;
+    height: 1vh;
+    background-color: #db1e1e;
+    text-align: center;
+    color: transparent;
+    border-radius: 8px;
 }
