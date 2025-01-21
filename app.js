@@ -104,6 +104,11 @@ app.get('/videos', videoController.getAllVideoBlobs.bind(videoController));
 app.get('/video/blob/:id', videoController.getVideoBlob.bind(videoController));
 app.get('/api/subscription-status/:userName', videoController.getSubscriptionStatus);
 app.post('/api/subscribe', videoController.subscribeToChannel);
+app.post('/api/video/record-view/:id', videoController.recordView);
+app.post('/api/video/interact', videoController.interactWithVideo);
+app.get('/api/video/interactions/:id', videoController.getVideoInteractions);
+app.get('/api/comments/:id', videoController.getComments);
+app.post('/api/comments', videoController.postComment);
 app.get('/video/:id', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'video.html'));
 });

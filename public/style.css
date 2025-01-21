@@ -146,11 +146,18 @@ form {
     padding: 1vw;
 }
 
+.videos-container {
+    background-color: #111111;
+    border-radius: 1vw;
+    padding-top: 0.5vh;
+}
+
 .video-item {
     width: 100%;
-    height: auto;
+    height: 38.5vh;
     border-radius: 12px;
-    border: 1px solid #3131313b;
+    position: relative;
+    border: 1px solid #31313100;
     transition: border 0.3s, background-color 0.15s;
     cursor: pointer;
     margin-bottom: 5vh;
@@ -186,17 +193,18 @@ form {
 }
 
 .author-profile-pic {
-    width: 50px;
-    height: 50px;
+    width: 2.5vw;
+    height: 2.5vw;
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid #ffffff33;
-    transition: border-color 0.2s;
+    transition: border-color 0.3s, filter 0.3s;
     cursor: pointer;
     aspect-ratio: 1/1;
 }
 
 .author-profile-pic:hover {
+    filter: brightness(0.7);
     border-color: #ffffff80;
 }
 
@@ -207,20 +215,7 @@ form {
     margin: 0;
     line-height: 1.2;
     text-overflow: ellipsis;
-}
-
-.video-author {
-    color: #818181;
-    font-size: 1.25rem;
-    font-weight: 500;
-    margin: 0;
-    cursor: pointer;
-    transition: color 0.2s;
-    line-height: 1.2;
-}
-
-.video-author:hover {
-    color: #d6d6d6;
+    height: auto;
 }
 
 
@@ -229,17 +224,45 @@ form {
     flex-direction: column;
 }
 
-.video-length {
-    margin-top: -45px;
-    text-align: right;
-    padding-right: 10px;
-    width: 100%;
-    height: fit-content;
+.video-date {
+    color: #aaa;
+    font-size: 0.8vw;
+    font-weight: 400;
+    margin: 0;
 }
 
-.video-length:hover {
-    display: none;
+.video-views {
+    color: #aaa;
+    display: flex;
+    font-weight: 400;
+    margin: 0;
+    font-size: 0.8vw;
+    width: fit-content;
 }
+
+.video-meta {
+    display: flex;
+    flex-direction: row;
+}
+
+.video-separator {
+    margin: 0 0.4vw;
+    font-size: 1vw;
+    color: #aaa;
+}
+
+.video-length {
+    position: absolute;
+    right: 0;
+    bottom: 12vh;
+    right: 0.3vw;
+    padding: 0.1vw .2vw;
+    font-size: 0.9vw;
+    color: #fff;
+    background-color: rgb(31, 31, 31, 0.8);
+    border-radius: 0.2vw;
+}
+
 
 
 .video-container {
@@ -249,25 +272,46 @@ form {
 }
 
 .video-name-home {
-    font-size: 1.15rem;
+    font-size: 1vw;
     color: #F1F1F1;
     font-weight: 500;
     margin: 0;
     margin-top: 0.15vw;
     line-height: 1.2;
     text-overflow: clip;
-    width: 100%;
+    width: fit-content;
 }
 
 .video-author-home {
-    font-size: 0.9rem;
-    color: #818181;
+    font-size: 0.8vw;
+    color: #aaa;
+    font-weight: 400;
+    margin: 0;
+    margin-top: 6px;
+    margin-bottom: -5px;
+    cursor: pointer;
+    transition: filter 0.3s;
+    line-height: 1.2;
+}
+
+.video-author-home:hover {
+    filter: brightness(0.7);
+}
+
+.video-author {
+    color: #F1F1F1;
+    font-size: 1.1rem;
     font-weight: 500;
     margin: 0;
     cursor: pointer;
-    transition: color 0.2s;
+    transition: filter 0.3s;
     line-height: 1.2;
 }
+
+.video-author:hover {
+    filter: brightness(0.7);
+}
+
 
 .video-info-container {
     margin-top: 20px;
@@ -282,13 +326,9 @@ form {
 
 .video-info-container .video-author {
     text-decoration: none;
-    color: #fff;
     font-weight: 500;
 }
 
-.video-info-container .video-author:hover {
-    color: #1a73e8;
-}
 
 .video-info-container .video-date {
     color: #aaa;
@@ -307,18 +347,23 @@ form {
 }
 
 .video-thumbnail {
-    width: 99.5%;
+    width: 100%;
     aspect-ratio: 16/9;
-    border-radius: 12px;
-    border: 1px solid #ffffff4d;
-    transition: filter 0.2s, border 0.2s;
+    border-radius: .75vw;
+    border: 0.1vw solid #ffffff21;
+    transition: filter 0.3s, border 0.3s;
     margin: 0;
+    position: relative;
 }
 
 .video-thumbnail:hover {
-    border: 1px solid #ffffff88;
+    border: 1px solid #f1f1f1;
     cursor: pointer;
     filter: brightness(0.55);
+}
+
+.video-thumbnail:hover + .video-length {
+    display: none;
 }
 
 .error {
@@ -399,7 +444,7 @@ form {
     border-radius: 12px;
     cursor: pointer;
     width: 90px;
-    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+    transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
 }
 
 #loginButton:hover, #registerButton:hover, #logoutButton:hover, #uploadButton:hover {
@@ -477,18 +522,21 @@ form {
 
 #changeProfilePicture, #editNameBtn, #saveNameBtn, #cancelNameBtn {
     padding: 8px 16px;
-    margin: 5px;
     background-color: #FF0033;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.3s;
 }
 
 #changeProfilePicture:hover, #editNameBtn:hover, #saveNameBtn:hover, #cancelNameBtn:hover {
     background-color: #ffffff;
     color: #000;
+}
+
+#editNameBtn {
+    margin-right: -10px;
 }
 
 .profile-nav {
@@ -511,7 +559,7 @@ form {
     border-radius: 50%;
     cursor: pointer;
     border: 2px solid #ffffff33;
-    transition: border-color 0.2s;
+    transition: border-color 0.3s;
     object-fit: cover;
 }
 
@@ -526,7 +574,7 @@ form {
     border: none;
     border-radius: 20px;
     cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .profile-nav button:hover {
@@ -540,7 +588,7 @@ form {
     border-radius: 20px;
     font-weight: 600;
     color: #ffffff;
-    transition: background-color 0.2s, border-color 0.2s;
+    transition: background-color 0.3s, border-color 0.3s;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -563,7 +611,7 @@ form {
     border: solid 1px transparent;
     font-weight: 600;
     color: #ffffff;
-    transition: background-color 0.2s, border-color 0.2s;
+    transition: background-color 0.3s, border-color 0.3s;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -620,7 +668,7 @@ form {
     gap: 12px;
     color: white;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.3s;
 }
 
 .dropdown-item:hover {
@@ -639,6 +687,10 @@ form {
 
 #video-intro {
     padding: 0 10px;
+    font-size: 1.75vw;
+    margin: 0;
+    margin-top: -0.5vh;
+    margin-bottom: 2vh;
 }
 
 .navbar {
@@ -687,7 +739,7 @@ form {
     border: solid 1px transparent;
     font-weight: 600;
     color: #ffffff;
-    transition: background-color 0.2s, border-color 0.2s;
+    transition: background-color 0.3s, border-color 0.3s;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -754,7 +806,7 @@ form {
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.3s;
 }
 
 #postCommentBtn:hover {
@@ -783,7 +835,7 @@ form {
     border: none;
     color: white;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.3s;
 }
 
 .interaction-btn:hover {
@@ -791,30 +843,54 @@ form {
 }
 
 .interaction-btn.active {
-    background: #FF0033;
+    background: #313131;
 }
 
-.interaction-btn svg {
-    fill: currentColor;
+.interaction-btn svg#likeIconActive,
+.interaction-btn svg#dislikeIconActive {
+    display: none;
+}
+
+.interaction-btn.active svg#likeIcon {
+    display: none;
+}
+
+.interaction-btn.active svg#likeIconActive {
+    display: inline;
+}
+
+.interaction-btn.active svg#dislikeIcon {
+    display: none;
+}
+
+.interaction-btn.active svg#dislikeIconActive {
+    display: inline;
 }
 
 .subscription-info {
     margin-top: 20px;
+    margin-left: -5px;
+    align-items: flex-start;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
 }
 
 .subscribe-btn {
     padding: 10px 20px;
-    background: #FF0033;
+    background: #f1f1f1e8;
     border: none;
     border-radius: 20px;
-    color: white;
-    font-weight: 500;
+    color: #000;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .subscribe-btn.subscribed {
     background: #272727;
+    color: white;
 }
 
 .subscribe-btn:hover {
@@ -823,7 +899,8 @@ form {
 }
 
 #subscriberCount {
-    margin-left: 10px;
+    margin-top: 10px;
+    width: 100%;
     color: #aaa;
 }
 
@@ -848,7 +925,7 @@ form {
     border-radius: 4px;
     color: white;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.3s;
 }
 
 .error-message button:hover {

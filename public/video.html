@@ -72,23 +72,27 @@
         <div class="video-info-container">
             <h2 id="videoName" class="video-name"></h2>
             <div class="author-info">
-                <img id="authorProfilePic" class="author-profile-pic" alt="Author Profile">
-                <div class="text-info">
-                    <a id="authorName" class="video-author"></a>
+                <img id="authorProfilePic" class="author-profile-pic" alt="Author Profile" onclick="window.location.href='/profile.html?user=' + document.getElementById('authorName').textContent;">
+                 <div class="text-info">
+                    <a id="authorName" class="video-author" onclick="window.location.href='/profile.html?user=' + this.textContent;"></a>
                     <p id="uploadDate" class="video-date"></p>
                 </div>
                 <div class="video-interactions">
                     <div class="interaction-container">
                         <button id="likeBtn" class="interaction-btn">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                                <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
+                            <svg id="likeIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-thumb-up">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M7 11v8a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1v-7a1 1 0 0 1 1 -1h3a4 4 0 0 0 4 -4v-1a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1 -2 2h-7a3 3 0 0 1 -3 -3" />
                             </svg>
+                            <svg id="likeIconActive"  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="currentColor"  class="icon icon-tabler icons-tabler-filled icon-tabler-thumb-up"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M13 3a3 3 0 0 1 2.995 2.824l.005 .176v4h2a3 3 0 0 1 2.98 2.65l.015 .174l.005 .176l-.02 .196l-1.006 5.032c-.381 1.626 -1.502 2.796 -2.81 2.78l-.164 -.008h-8a1 1 0 0 1 -.993 -.883l-.007 -.117l.001 -9.536a1 1 0 0 1 .5 -.865a2.998 2.998 0 0 0 1.492 -2.397l.007 -.202v-1a3 3 0 0 1 3 -3z" /><path d="M5 10a1 1 0 0 1 .993 .883l.007 .117v9a1 1 0 0 1 -.883 .993l-.117 .007h-1a2 2 0 0 1 -1.995 -1.85l-.005 -.15v-7a2 2 0 0 1 1.85 -1.995l.15 -.005h1z" /></svg>
                             <span id="likeCount">0</span>
                         </button>
                         <button id="dislikeBtn" class="interaction-btn">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                                <path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/>
+                            <svg id="dislikeIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-thumb-down">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M7 13v-8a1 1 0 0 0 -1 -1h-2a1 1 0 0 0 -1 1v7a1 1 0 0 0 1 1h3a4 4 0 0 1 4 4v1a2 2 0 0 0 4 0v-5h3a2 2 0 0 0 2 -2l-1 -5a2 3 0 0 0 -2 -2h-7a3 3 0 0 0 -3 3" />
                             </svg>
+                            <svg id="dislikeIconActive" xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="currentColor"  class="icon icon-tabler icons-tabler-filled icon-tabler-thumb-down"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M13 21.008a3 3 0 0 0 2.995 -2.823l.005 -.177v-4h2a3 3 0 0 0 2.98 -2.65l.015 -.173l.005 -.177l-.02 -.196l-1.006 -5.032c-.381 -1.625 -1.502 -2.796 -2.81 -2.78l-.164 .008h-8a1 1 0 0 0 -.993 .884l-.007 .116l.001 9.536a1 1 0 0 0 .5 .866a2.998 2.998 0 0 1 1.492 2.396l.007 .202v1a3 3 0 0 0 3 3z" /><path d="M5 14.008a1 1 0 0 0 .993 -.883l.007 -.117v-9a1 1 0 0 0 -.883 -.993l-.117 -.007h-1a2 2 0 0 0 -1.995 1.852l-.005 .15v7a2 2 0 0 0 1.85 1.994l.15 .005h1z" /></svg>
                             <span id="dislikeCount">0</span>
                         </button>
                     </div>
@@ -96,7 +100,16 @@
             </div>
             <div class="video-stats">
                 <span id="viewCount">0 views</span>
+                <span id="videoDate" class="video-date"></span>
             </div>
+        </div>
+        <div class="comments-section">
+            <h3>Comments</h3>
+            <div id="commentsContainer"></div>
+            <form id="commentForm">
+                <textarea id="commentText" placeholder="Add a comment..." required></textarea>
+                <button type="submit" id="postCommentBtn">Post Comment</button>
+            </form>
         </div>
     </div>
 
@@ -105,24 +118,31 @@
             try {
                 const videoId = new URLSearchParams(window.location.search).get('id');
                 const response = await fetch(`/api/video/interactions/${videoId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch video interactions');
+                }
                 const data = await response.json();
                 
                 document.getElementById('likeCount').textContent = data.likes;
                 document.getElementById('dislikeCount').textContent = data.dislikes;
-                
+
                 if (data.userInteraction === 'LIKE') {
                     document.getElementById('likeBtn').classList.add('active');
                 } else if (data.userInteraction === 'DISLIKE') {
                     document.getElementById('dislikeBtn').classList.add('active');
                 }
             } catch (error) {
-                console.error('Error loading interactions:', error);
+                console.error('Error:', error);
             }
         }
 
         document.getElementById('likeBtn').addEventListener('click', async () => {
             try {
                 const videoId = new URLSearchParams(window.location.search).get('id');
+                const likeBtn = document.getElementById('likeBtn');
+                const isActive = likeBtn.classList.contains('active');
+                const interactionType = isActive ? 'REMOVE' : 'LIKE';
+
                 const response = await fetch('/api/video/interact', {
                     method: 'POST',
                     headers: {
@@ -130,16 +150,20 @@
                     },
                     body: JSON.stringify({
                         videoId: videoId,
-                        interactionType: 'LIKE'
+                        interactionType: interactionType
                     })
                 });
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     document.getElementById('likeCount').textContent = data.likes;
                     document.getElementById('dislikeCount').textContent = data.dislikes;
-                    document.getElementById('likeBtn').classList.toggle('active');
-                    document.getElementById('dislikeBtn').classList.remove('active');
+                    if (interactionType === 'REMOVE') {
+                        likeBtn.classList.remove('active');
+                    } else {
+                        likeBtn.classList.add('active');
+                        document.getElementById('dislikeBtn').classList.remove('active');
+                    }
                 } else if (response.status === 401) {
                     alert('Please log in to like videos');
                 }
@@ -151,6 +175,10 @@
         document.getElementById('dislikeBtn').addEventListener('click', async () => {
             try {
                 const videoId = new URLSearchParams(window.location.search).get('id');
+                const dislikeBtn = document.getElementById('dislikeBtn');
+                const isActive = dislikeBtn.classList.contains('active');
+                const interactionType = isActive ? 'REMOVE' : 'DISLIKE';
+
                 const response = await fetch('/api/video/interact', {
                     method: 'POST',
                     headers: {
@@ -158,16 +186,20 @@
                     },
                     body: JSON.stringify({
                         videoId: videoId,
-                        interactionType: 'DISLIKE'
+                        interactionType: interactionType
                     })
                 });
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     document.getElementById('likeCount').textContent = data.likes;
                     document.getElementById('dislikeCount').textContent = data.dislikes;
-                    document.getElementById('dislikeBtn').classList.toggle('active');
-                    document.getElementById('likeBtn').classList.remove('active');
+                    if (interactionType === 'REMOVE') {
+                        dislikeBtn.classList.remove('active');
+                    } else {
+                        dislikeBtn.classList.add('active');
+                        document.getElementById('likeBtn').classList.remove('active');
+                    }
                 } else if (response.status === 401) {
                     alert('Please log in to dislike videos');
                 }
@@ -176,12 +208,70 @@
             }
         });
 
-        async function recordView() {
+        async function fetchComments(videoId) {
             try {
-                const videoId = new URLSearchParams(window.location.search).get('id');
-                const response = await fetch(`/api/video/view/${videoId}`, {
+                const response = await fetch(`/api/comments/${videoId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch comments');
+                }
+                const comments = await response.json();
+                const commentsContainer = document.getElementById('commentsContainer');
+                commentsContainer.innerHTML = '';
+                comments.forEach(comment => {
+                    const commentElement = document.createElement('div');
+                    commentElement.classList.add('comment');
+                    commentElement.innerHTML = `
+                        <p><strong>${comment.user_name}</strong></p>
+                        <p>${comment.comment_text}</p>
+                        <p>${comment.comment_date}</p>
+                    `;
+                    commentsContainer.appendChild(commentElement);
+                });
+            } catch (error) {
+                console.error('Error fetching comments:', error);
+            }
+        }
+
+        document.getElementById('commentForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const videoId = new URLSearchParams(window.location.search).get('id');
+            const commentText = document.getElementById('commentText').value;
+
+            try {
+                const response = await fetch('/api/comments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ videoId, commentText })
+                });
+
+                if (response.status === 401) {
+                    alert('Please log in to post a comment');
+                    return;
+                }
+
+                if (response.ok) {
+                    document.getElementById('commentText').value = '';
+                    fetchComments(videoId);
+                } else {
+                    console.error('Failed to post comment');
+                }
+            } catch (error) {
+                console.error('Error posting comment:', error);
+            }
+        });
+
+        async function recordView() {
+            const videoId = new URLSearchParams(window.location.search).get('id');
+            try {
+                const response = await fetch(`/api/video/record-view/${videoId}`, {
                     method: 'POST'
                 });
+                if (response.status === 401) {
+                    console.log('User not logged in, view not recorded');
+                    return;
+                }
                 const data = await response.json();
                 document.getElementById('viewCount').textContent = 
                     `${data.views} ${data.views === 1 ? 'view' : 'views'}`;
@@ -602,7 +692,8 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
                 await checkLoginStatus();
                 const urlParams = new URLSearchParams(window.location.search);
                 const videoId = urlParams.get('id');
-                
+                await fetchComments(videoId);
+
                 if (videoId) {
                     // Load video details first
                     const videoDetails = await fetchVideoDetails(videoId);
@@ -626,7 +717,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
                     
                     // Load additional information
                     await loadVideoInteractions();
-                    await recordView();
+                    await recordView(); // Ensure this is called
                 } else {
                     console.error('Video ID not found in URL');
                 }
@@ -634,7 +725,6 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
                 console.error('Error during page initialization:', error);
             }
         };
-
     </script>
 </body>
 </html>

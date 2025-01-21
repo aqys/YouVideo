@@ -107,7 +107,9 @@
     </button>
 
     <h2 id="video-intro">Videos</h2>
-    <div id="videoGrid" class="video-grid"></div>
+    <div class="videos-container">
+        <div id="videoGrid" class="video-grid"></div>
+    </div>
 
     <script>
         document.getElementById('loginButton').addEventListener('click', function() {
@@ -232,6 +234,7 @@
                                 class="video-thumbnail"
                                 onerror="this.parentElement.innerHTML = '<div class=\'no-thumbnail\'><span>No Thumbnail</span></div>'"
                             />
+                            <span class="video-length">${video.video_length}</span>
                             <div class="video-info">
                                 <div class="author-info">
                                     <img 
@@ -244,9 +247,12 @@
                                     <div class="text-info">
                                         <p class="video-name-home">${video.video_name}</p>
                                         <p class="video-author-home" onclick="event.stopPropagation(); window.location.href='/profile.html?user=${video.author}'">${video.author || 'Unknown'}</p>
+                                        <div class="video-meta">
+                                            <p class="video-views">${video.views} ${video.views === 1 ? 'view' : 'views'}</p>
+                                            <p class="video-separator">&bull;</p>
+                                            <p class="video-date">${video.video_date}</p>
+                                        </div>
                                     </div>
-                                        <p class="video-length">${video.video_length}</p>
-
                                 </div>
                             </div>
                         `;
@@ -291,12 +297,13 @@
                             alt="Profile" 
                             onerror="this.src='/default-profile.png'"
                             class="profile-picture"
+                            onclick="window.location.href='/profile.html?user=${data.user.userName}'"
                         />
                     `;
                     if(uploadButton) uploadButton.style.display = 'flex';
                     
                     dropdownMenu.innerHTML = `
-                        <div class="dropdown-item" id="yourChannel">
+                        <div class="dropdown-item" id="yourChannel" onclick="window.location.href='/profile.html?user=${data.user.userName}'">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
                                 <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
                                 <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
