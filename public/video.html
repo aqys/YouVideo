@@ -105,15 +105,29 @@
         </div>
         <div class="comments-section">
             <h3>Comments</h3>
-            <div id="commentsContainer"></div>
             <form id="commentForm">
                 <textarea id="commentText" placeholder="Add a comment..." required></textarea>
                 <button type="submit" id="postCommentBtn">Post Comment</button>
             </form>
+            <div id="commentsContainer"></div>
         </div>
     </div>
 
     <script>
+
+        const textarea = document.getElementById('commentText');
+
+        textarea.addEventListener('input', autoResize, false);
+
+        function autoResize() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        }
+        function getVideoId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
         async function loadVideoInteractions() {
             try {
                 const videoId = new URLSearchParams(window.location.search).get('id');
@@ -208,11 +222,17 @@
             }
         });
 
-        async function fetchComments(videoId) {
+        async function fetchComments() {
+            const videoId = getVideoId();
+            if (!videoId) {
+                console.error('No video ID found in URL');
+                return;
+            }
+
             try {
                 const response = await fetch(`/api/comments/${videoId}`);
                 if (!response.ok) {
-                    throw new Error('Failed to fetch comments');
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const comments = await response.json();
                 const commentsContainer = document.getElementById('commentsContainer');
@@ -221,21 +241,37 @@
                     const commentElement = document.createElement('div');
                     commentElement.classList.add('comment');
                     commentElement.innerHTML = `
-                        <p><strong>${comment.user_name}</strong></p>
-                        <p>${comment.comment_text}</p>
-                        <p>${comment.comment_date}</p>
+                        <img src="/profile-picture/${comment.user_name}" 
+                            onerror="this.src='/default-profile.png'" 
+                            class="comment-profile-pic"
+                            alt="${comment.user_name}'s profile picture">
+                        <div class="comment-content">
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
+                                <p style="font-size: 1.1rem; margin: 0;"><strong>${comment.user_name}</strong></p>
+                                <p style="opacity: 0.5; margin: 0; font-size: 0.9rem;">${comment.comment_date}</p>
+                            </div>
+                            <p style="margin: 0;">${comment.comment_text}</p>
+                        </div>
                     `;
                     commentsContainer.appendChild(commentElement);
                 });
             } catch (error) {
-                console.error('Error fetching comments:', error);
+                console.error('Error fetching comments:', error.message);
+                const commentsContainer = document.getElementById('commentsContainer');
+                commentsContainer.innerHTML = '<p>Failed to load comments. Please try again later.</p>';
             }
         }
 
         document.getElementById('commentForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const videoId = new URLSearchParams(window.location.search).get('id');
-            const commentText = document.getElementById('commentText').value;
+            event.preventDefault(); // Prevent the default form submission
+
+            const videoId = getVideoId();
+            const commentText = document.getElementById('commentText').value.trim(); // Trim whitespace
+
+            if (!commentText) {
+                console.error('Comment text is empty');
+                return;
+            }
 
             try {
                 const response = await fetch('/api/comments', {
@@ -243,17 +279,19 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ videoId, commentText })
+                    body: JSON.stringify({
+                        videoId: videoId,
+                        commentText: commentText // Ensure the key matches the server-side expectation
+                    })
                 });
 
-                if (response.status === 401) {
-                    alert('Please log in to post a comment');
-                    return;
-                }
-
                 if (response.ok) {
+                    const message = await response.text(); // Use response.text() to handle plain text
+                    console.log('Comment posted successfully:', message);
+                    // Clear the comment input
                     document.getElementById('commentText').value = '';
-                    fetchComments(videoId);
+                    // Reload comments or update the comments section
+                    await fetchComments(videoId);
                 } else {
                     console.error('Failed to post comment');
                 }
@@ -355,6 +393,7 @@
                             <span>Sign in</span>
                         </div>
                     `;
+
                 }
                 
                 const oldProfileNav = document.getElementById('profileNav');
@@ -427,19 +466,20 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
     try {
         const response = await fetch('/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ userName, userPassword })
-        });
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ userName, userPassword })
+                });
 
-        if (response.ok) {
-            window.location.reload();
-        } else {
-            const error = await response.json();
-            alert(error.error);
-        }
+                if (response.ok) {
+                    // Reload the page after successful login
+                    window.location.reload();
+                } else {
+                    const error = await response.json();
+                    alert(error.error);
+                }
     } catch (error) {
         console.error('Error during login:', error);
     }
@@ -691,7 +731,11 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             try {
                 await checkLoginStatus();
                 const urlParams = new URLSearchParams(window.location.search);
-                const videoId = urlParams.get('id');
+                const videoId = getVideoId();
+                if (!videoId) {
+                    console.error('No video ID found in URL');
+                    return;
+                }
                 await fetchComments(videoId);
 
                 if (videoId) {

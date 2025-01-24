@@ -44,17 +44,17 @@ const poolPromise = mssql.connect(dbConfig)
     return null;
   });
 
-app.use(express.json({ limit: '500mb' }));
-app.use(express.urlencoded({ extended: true, limit: '500mb' }));
-app.use(session({
-  secret: 'skibidiHawkTuahSecret',
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-      secure: false,
-      maxAge: 24 * 60 * 60 * 1000
-  }
-}));
+  app.use(express.json({ limit: '500mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '500mb' }));
+  app.use(session({
+    secret: 'skibidiHawkTuahSecret',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        secure: false,
+        maxAge: 24 * 60 * 60 * 1000
+    }
+  }));
 
 /*
 app.get('/videos', async (req, res) => {
@@ -95,7 +95,7 @@ const upload = multer({
     storage: storage,
     limits: {
         fileSize: 500 * 1024 * 1024, // 500MB limit
-        fieldSize: 500 * 1024 * 1024
+        fieldSize: 1000 * 1024 * 1024
     }
 });
 app.get('/thumbnail/:id', videoController.getThumbnail);

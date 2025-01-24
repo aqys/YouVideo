@@ -54,7 +54,34 @@ function formatVideoLength(seconds) {
     }
 }
 
-const formatDate = (date) => {
+// For videos (no time adjustment)
+const formatVideoDate = (date) => {
+    const now = new Date();
+    const videoDate = new Date(date);
+    const diffInSeconds = Math.floor((now - videoDate) / 1000);
+
+    if (diffInSeconds < 60) {
+        return "Just now";
+    } else if (diffInSeconds < 3600) {
+        const diffInMinutes = Math.floor(diffInSeconds / 60);
+        return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
+    } else if (diffInSeconds < 86400) {
+        const diffInHours = Math.floor(diffInSeconds / 3600);
+        return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
+    } else if (diffInSeconds < 2592000) {
+        const diffInDays = Math.floor(diffInSeconds / 86400);
+        return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+    } else if (diffInSeconds < 31536000) {
+        const diffInMonths = Math.floor(diffInSeconds / 2592000);
+        return `${diffInMonths} month${diffInMonths !== 1 ? 's' : ''} ago`;
+    } else {
+        const diffInYears = Math.floor(diffInSeconds / 31536000);
+        return `${diffInYears} year${diffInYears !== 1 ? 's' : ''} ago`;
+    }
+};
+
+// For comments (with 1-hour adjustment)
+const formatCommentDate = (date) => {
     const now = new Date();
     const commentDate = new Date(date);
     commentDate.setHours(commentDate.getHours() - 1); // Subtract one hour
@@ -97,7 +124,7 @@ exports.getAllVideoBlobs = async (req, res) => {
 
         const videos = result.recordset.map(video => {
             video.video_length = formatVideoLength(video.video_length);
-            video.video_date = formatDate(video.video_date);
+            video.video_date = formatVideoDate(video.video_date); // Use new function
             return video;
         });
 
@@ -480,33 +507,33 @@ exports.uploadVideo = async (req, res) => {
     if (!req.session.user) {
         return res.status(401).send('You must be logged in to upload videos');
     }
-
+  
     try {
         const videoFile = req.file;
         const videoName = req.body.videoName;
         const author = req.session.user.userName;
-
+  
         if (!videoFile || !videoName) {
             return res.status(400).send('Missing file or video name');
         }
-
+  
         const pool = await poolPromise;
         if (!pool) {
             throw new Error('Database connection failed');
         }
-
+  
         const tempVideoPath = path.join(os.tmpdir(), `${uuidv4()}.mp4`);
         const thumbnailPath = path.join(os.tmpdir(), `${uuidv4()}.png`);
-
+  
         await fs.writeFile(tempVideoPath, videoFile.buffer);
-
+  
         const duration = await new Promise((resolve, reject) => {
             ffmpeg.ffprobe(tempVideoPath, (err, metadata) => {
                 if (err) reject(err);
                 else resolve(metadata.format.duration);
             });
         });
-
+  
         await new Promise((resolve, reject) => {
             ffmpeg(tempVideoPath)
                 .screenshots({
@@ -519,32 +546,31 @@ exports.uploadVideo = async (req, res) => {
                 .on('end', resolve)
                 .on('error', reject);
         });
-
+  
         const thumbnailBuffer = await fs.readFile(thumbnailPath);
-
+  
         await pool.request()
             .input('videoName', mssql.NVarChar, videoName)
             .input('videoBlob', mssql.VarBinary(mssql.MAX), videoFile.buffer)
             .input('thumbnailBlob', mssql.VarBinary(mssql.MAX), thumbnailBuffer)
             .input('author', mssql.NVarChar, author)
             .input('videoLength', mssql.Float, duration)
-            .input('videoDate', mssql.DateTime2, new Date()) // Add this line
             .query(`
-                INSERT INTO videos (video_name, video_blob, thumbnail_blob, author, video_length, video_date) 
-                VALUES (@videoName, @videoBlob, @thumbnailBlob, @author, @videoLength, @videoDate)
+                INSERT INTO videos (video_name, video_blob, thumbnail_blob, author, video_length) 
+                VALUES (@videoName, @videoBlob, @thumbnailBlob, @author, @videoLength)
             `);
-
+  
         await Promise.all([
             fs.unlink(tempVideoPath).catch(console.error),
             fs.unlink(thumbnailPath).catch(console.error)
         ]);
-
+  
         res.status(200).json({ message: 'Upload successful' });
     } catch (err) {
         console.error('Error in upload:', err);
         res.status(500).json({ error: 'Upload failed: ' + err.message });
     }
-};
+  };
 
 exports.getComments = async (req, res) => {
     const videoId = req.params.id;
@@ -558,7 +584,7 @@ exports.getComments = async (req, res) => {
             .query('SELECT * FROM comments WHERE video_id = @videoId ORDER BY comment_date DESC');
         
         const comments = result.recordset.map(comment => {
-            comment.comment_date = formatDate(comment.comment_date);
+            comment.comment_date = formatCommentDate(comment.comment_date); // Use adjusted function
             return comment;
         });
 
