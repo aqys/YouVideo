@@ -31,7 +31,6 @@ const dbConfig = {
   }
 };
 
-
 console.log('Database configuration:', dbConfig);
 
 const poolPromise = mssql.connect(dbConfig)
@@ -44,48 +43,20 @@ const poolPromise = mssql.connect(dbConfig)
     return null;
   });
 
-  app.use(express.json({ limit: '500mb' }));
-  app.use(express.urlencoded({ extended: true, limit: '500mb' }));
-  app.use(session({
-    secret: 'skibidiHawkTuahSecret',
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        secure: false,
-        maxAge: 24 * 60 * 60 * 1000
-    }
-  }));
-
-/*
-app.get('/videos', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-    if (!pool) {
-      throw new Error('Database connection failed');
-    }
-    const result = await pool.request()
-      .query('SELECT id, video_name, author, video_length FROM videos ORDER BY NEWID()');
-
-    const videos = result.recordset.map(video => {
-      video.video_length = formatVideoLength(video.video_length);
-      return video;
-    });
-
-    res.json(videos);
-  } catch (err) {
-    console.error('Error fetching video list:', err.message);
-    res.status(500).json({ error: 'Error fetching video list' });
+app.use(express.json({ limit: '500mb' }));
+app.use(express.urlencoded({ extended: true, limit: '500mb' }));
+app.use(session({
+  secret: 'skibidiHawkTuahSecret',
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    secure: false,
+    maxAge: 24 * 60 * 60 * 1000
   }
-});
-*/
-app.get('/videos', videoController.getAllVideoBlobs);
-
+}));
 
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // Configure multer storage
 const storage = multer.memoryStorage();
@@ -95,9 +66,10 @@ const upload = multer({
     storage: storage,
     limits: {
         fileSize: 500 * 1024 * 1024, // 500MB limit
-        fieldSize: 1000 * 1024 * 1024
+        fieldSize: 500 * 1024 * 1024
     }
 });
+
 app.get('/thumbnail/:id', videoController.getThumbnail);
 app.get('/', videoController.homePage);
 app.get('/videos', videoController.getAllVideoBlobs.bind(videoController));
@@ -117,8 +89,45 @@ app.post('/upload', upload.single('videoFile'), async (req, res) => {
   try {
       await videoController.uploadVideo(req, res);
   } catch (error) {
-      console.error('Upload error:', error);
+      console.error('Upload error:', error);  
       res.status(500).send(error.message);
+  }
+});
+
+
+app.post('/api/update-profile-picture', upload.single('profilePicture'), async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const fileBuffer = await fs.promises.readFile(req.file.path);
+    const pool = await poolPromise;
+
+    await pool.request()
+      .input('userName', mssql.NVarChar, req.session.user.userName)
+      .input('profilePicture', mssql.VarBinary(mssql.MAX), fileBuffer)
+      .query('UPDATE users SET profile_picture = @profilePicture WHERE userName = @userName');
+
+    // Clean up uploaded file
+    await fs.promises.unlink(req.file.path);
+
+    res.json({ message: 'Profile picture updated' });
+  } catch (err) {
+    console.error('Error updating profile picture:', err);
+    // Clean up on error
+    if (req.file?.path) {
+      try {
+        await fs.promises.unlink(req.file.path);
+      } catch (unlinkErr) {
+        console.error('Error cleaning up file:', unlinkErr);
+      }
+    }
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
@@ -148,38 +157,38 @@ app.get('/video/name/:id', async (req, res) => {
 app.post('/login', async (req, res) => {
   const { userName, userPassword } = req.body;
   try {
-      const pool = await poolPromise;
-      if (!pool) {
-          throw new Error('Database connection failed');
-      }
-      const result = await pool.request()
-          .input('userName', mssql.NVarChar, userName)
-          .query('SELECT * FROM users WHERE userName = @userName');
+    const pool = await poolPromise;
+    if (!pool) {
+      throw new Error('Database connection failed');
+    }
+    const result = await pool.request()
+      .input('userName', mssql.NVarChar, userName)
+      .query('SELECT * FROM users WHERE userName = @userName');
 
-      if (result.recordset.length > 0) {
-          const user = result.recordset[0];
-          const passwordMatch = await bcrypt.compare(userPassword, user.userPassword);
-          if (passwordMatch) {
-              req.session.user = { 
-                  userName: user.userName 
-              };
-              req.session.save((err) => {
-                  if (err) {
-                      console.error('Session save error:', err);
-                      return res.status(500).json({ error: 'Session error' });
-                  }
-                  console.log('Session after login:', req.session);
-                  res.json({ userName: user.userName });
-              });
-          } else {
-              res.status(401).json({ error: 'Invalid username or password' });
+    if (result.recordset.length > 0) {
+      const user = result.recordset[0];
+      const passwordMatch = await bcrypt.compare(userPassword, user.userPassword);
+      if (passwordMatch) {
+        req.session.user = { 
+          userName: user.userName 
+        };
+        req.session.save((err) => {
+          if (err) {
+            console.error('Session save error:', err);
+            return res.status(500).json({ error: 'Session error' });
           }
+          console.log('Session after login:', req.session);
+          res.json({ userName: user.userName });
+        });
       } else {
-          res.status(401).json({ error: 'Invalid username or password' });
+        res.status(401).json({ error: 'Invalid username or password' });
       }
+    } else {
+      res.status(401).json({ error: 'Invalid username or password' });
+    }
   } catch (err) {
-      console.error('Error during login:', err);
-      res.status(500).json({ error: 'Error during login' });
+    console.error('Error during login:', err);
+    res.status(500).json({ error: 'Error during login' });
   }
 });
 
@@ -216,16 +225,15 @@ app.post('/register', async (req, res) => {
   }
 });
 
-
 app.get('/debug-session', (req, res) => {
-    console.log('Full session:', req.session);
-    console.log('Session ID:', req.sessionID)
-    console.log('Session user:', req.session.user);
-    res.json({
-        sessionId: req.sessionID,
-        session: req.session,
-        user: req.session.user
-    });
+  console.log('Full session:', req.session);
+  console.log('Session ID:', req.sessionID)
+  console.log('Session user:', req.session.user);
+  res.json({
+    sessionId: req.sessionID,
+    session: req.session,
+    user: req.session.user
+  });
 });
 
 app.get('/check-connection', async (req, res) => {
@@ -247,36 +255,36 @@ app.get('/api/profile/:userName?', async (req, res) => {
   console.log('Session user:', req.session.user);
   
   try {
-      if (!req.session.user) {
-          console.log('No session user found');
-          return res.status(401).json({ error: 'Not authenticated' });
-      }
+    if (!req.session.user) {
+      console.log('No session user found');
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
 
-      const requestedUserName = req.params.userName || req.session.user.userName;
-      console.log('Requested username:', requestedUserName);
+    const requestedUserName = req.params.userName || req.session.user.userName;
+    console.log('Requested username:', requestedUserName);
 
-      const pool = await poolPromise;
-      const result = await pool.request()
-          .input('userName', mssql.NVarChar, requestedUserName)
-          .query('SELECT userName FROM users WHERE userName = @userName');
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input('userName', mssql.NVarChar, requestedUserName)
+      .query('SELECT userName FROM users WHERE userName = @userName');
 
-      if (result.recordset.length === 0) {
-          return res.status(404).json({ error: 'User not found' });
-      }
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
-      const isOwnProfile = req.session.user.userName === requestedUserName;
-      console.log('Is own profile:', isOwnProfile);
+    const isOwnProfile = req.session.user.userName === requestedUserName;
+    console.log('Is own profile:', isOwnProfile);
 
-      const profileData = {
-          userName: result.recordset[0].userName,
-          isOwnProfile: isOwnProfile
-      };
-      console.log('Profile data:', profileData); // Log the profile data
+    const profileData = {
+      userName: result.recordset[0].userName,
+      isOwnProfile: isOwnProfile
+    };
+    console.log('Profile data:', profileData); // Log the profile data
 
-      res.json(profileData);
+    res.json(profileData);
   } catch (err) {
-      console.error('Error fetching profile:', err);
-      res.status(500).json({ error: 'Server error' });
+    console.error('Error fetching profile:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
@@ -327,15 +335,32 @@ app.post('/api/update-profile-picture', upload.single('profilePicture'), async (
   }
 
   try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const fileBuffer = await fs.promises.readFile(req.file.path);
     const pool = await poolPromise;
+
     await pool.request()
       .input('userName', mssql.NVarChar, req.session.user.userName)
-      .input('profilePicture', mssql.VarBinary(mssql.MAX), req.file.buffer)
+      .input('profilePicture', mssql.VarBinary(mssql.MAX), fileBuffer)
       .query('UPDATE users SET profile_picture = @profilePicture WHERE userName = @userName');
+
+    // Clean up uploaded file
+    await fs.promises.unlink(req.file.path);
 
     res.json({ message: 'Profile picture updated' });
   } catch (err) {
     console.error('Error updating profile picture:', err);
+    // Clean up on error
+    if (req.file?.path) {
+      try {
+        await fs.promises.unlink(req.file.path);
+      } catch (unlinkErr) {
+        console.error('Error cleaning up file:', unlinkErr);
+      }
+    }
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -386,18 +411,18 @@ app.get('/check-login', (req, res) => {
 
 ffmpeg.getAvailableFormats((err, formats) => {
   if (err) {
-      console.error('FFmpeg error:', err);
+    console.error('FFmpeg error:', err);
   } else {
-      console.log('FFmpeg is properly installed');
+    console.log('FFmpeg is properly installed');
   }
 });
 
 app.post('/logout', (req, res) => {
   req.session.destroy(err => {
-      if (err) {
-          return res.status(500).send('Error logging out');
-      }
-      res.send('Logged out');
+    if (err) {
+      return res.status(500).send('Error logging out');
+    }
+    res.send('Logged out');
   });
 });
 

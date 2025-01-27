@@ -190,9 +190,10 @@ form {
 }
 
 .author-profile-pic {
-    width: 4vw;
-    height: auto;
+    width: 3vw;
+    height: 3vw;
     border-radius: 50%;
+    margin-top: 0.75vh;
     object-fit: cover;
     border: 1px solid #ffffff33;
     transition: border-color 0.3s, filter 0.3s;
@@ -962,4 +963,5 @@ textarea {
     text-align: center;
     color: transparent;
     border-radius: 8px;
+    color: white;
 }
