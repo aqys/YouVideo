@@ -75,7 +75,6 @@
                 <img id="authorProfilePic" class="author-profile-pic" alt="Author Profile" onclick="window.location.href='/profile.html?user=' + document.getElementById('authorName').textContent;">
                  <div class="text-info">
                     <a id="authorName" class="video-author" onclick="window.location.href='/profile.html?user=' + this.textContent;"></a>
-                    <p id="uploadDate" class="video-date"></p>
                 </div>
                 <div class="video-interactions">
                     <div class="interaction-container">
@@ -100,6 +99,7 @@
             </div>
             <div class="video-stats">
                 <span id="viewCount">0 views</span>
+                <p class="date-separator">&bull;</p>
                 <span id="videoDate" class="video-date"></span>
             </div>
         </div>
@@ -115,6 +115,8 @@
 
     <script>
 
+
+
         const textarea = document.getElementById('commentText');
 
         textarea.addEventListener('input', autoResize, false);
@@ -128,6 +130,15 @@
             return urlParams.get('id');
         }
 
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoId = urlParams.get('id');
+
+            if (videoId) {
+                fetchVideoDetails(videoId);
+                recordView(videoId);
+            }
+        });
         async function loadVideoInteractions() {
             try {
                 const videoId = new URLSearchParams(window.location.search).get('id');
@@ -244,7 +255,8 @@
                         <img src="/profile-picture/${comment.user_name}" 
                             onerror="this.src='/default-profile.png'" 
                             class="comment-profile-pic"
-                            alt="${comment.user_name}'s profile picture">
+                            alt="${comment.user_name}'s profile picture"
+                        >
                         <div class="comment-content">
                             <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
                                 <p style="font-size: 1.1rem; margin: 0;"><strong>${comment.user_name}</strong></p>
@@ -558,21 +570,52 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             }
         }
 
+        async function loadVideoDetails() {
+            try {
+                const videoId = new URLSearchParams(window.location.search).get('id');
+                const response = await fetch(`/api/video/details/${videoId}`);
+                if (!response.ok) throw new Error('Failed to fetch video details');
+                
+                const videoDetails = await response.json();
+                
+                // Update video details including date
+                document.getElementById('videoName').textContent = videoDetails.video_name;
+                document.getElementById('authorName').textContent = videoDetails.author;
+                document.getElementById('viewCount').textContent = 
+                    `${videoDetails.views} ${videoDetails.views === 1 ? 'view' : 'views'}`;
+                document.getElementById('videoDate').textContent = videoDetails.formattedDate;
+            } catch (error) {
+                console.error('Error loading video details:', error);
+            }
+        }
+
         async function fetchVideoDetails(videoId) {
             try {
-                const videoResponse = await fetch('/videos');
-                const videos = await videoResponse.json();
-                const videoDetails = videos.find(video => video.id === parseInt(videoId));
-                
-                if (!videoDetails) {
-                    throw new Error('Video not found');
+                const response = await fetch(`/video/details/${videoId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-
-                return {
-                    video_name: videoDetails.video_name,
-                    author: videoDetails.author,
-                    video_date: videoDetails.upload_date
-                };
+                
+                const videoDetails = await response.json();
+                console.log('Received video details:', videoDetails); // Debug log
+                
+                // Update UI with video details
+                document.getElementById('videoName').textContent = videoDetails.video_name;
+                document.getElementById('authorName').textContent = videoDetails.author;
+                document.getElementById('authorName').href = `/profile.html?user=${videoDetails.author}`;
+                document.getElementById('authorProfilePic').src = `/profile-picture/${videoDetails.author}`;
+                
+                // Update both date elements
+                const videoDateElement = document.getElementById('videoDate');
+                
+                if (videoDateElement) videoDateElement.textContent = videoDetails.formattedDate;
+                
+                document.getElementById('viewCount').textContent = 
+                    `${videoDetails.views} ${videoDetails.views === 1 ? 'view' : 'views'}`;
+                
+                document.title = `${videoDetails.video_name} - YouVideo`;
+                
+                return videoDetails;
             } catch (error) {
                 console.error('Error fetching video details:', error);
             }
@@ -666,6 +709,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             await loadVideo();
         }
 
+        
         async function loadSubscriptionStatus() {
             try {
                 const urlParams = new URLSearchParams(window.location.search);
@@ -738,6 +782,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
                 }
                 await fetchComments(videoId);
 
+
                 if (videoId) {
                     // Load video details first
                     const videoDetails = await fetchVideoDetails(videoId);
@@ -748,12 +793,6 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
                         document.getElementById('authorName').href = `/profile.html?user=${videoDetails.author}`;
                         document.getElementById('authorProfilePic').src = `/profile-picture/${videoDetails.author}`;
                         
-                        if (videoDetails.video_date) {
-                            document.getElementById('uploadDate').textContent = 
-                                new Date(videoDetails.video_date).toLocaleDateString();
-                        } else {
-                            document.getElementById('uploadDate').style.display = 'none';
-                        }
                     }
 
                     // Load the video
